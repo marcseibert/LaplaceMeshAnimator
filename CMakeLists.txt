@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.13)
 
 project(LaplaceMeshAnimator)
 
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 17)
 
 # INCLUDE DIRS
 
@@ -19,10 +19,14 @@ add_executable(${PROJECT_NAME}
         src/common/CommonStructs.h
         src/common/GraphicsProgram.h
         src/common/Camera.hpp
+        src/common/Camera.cpp
         src/common/Shader.hpp
         src/common/ShaderManager.hpp
         src/common/ShaderManager.cpp
         src/common/Util.hpp
+        src/common/Util.cpp
+        src/common/Mesh.h
+        src/common/SceneNode.h
 
         src/common/drawables/Drawable.hpp
         src/common/drawables/Sprite.hpp
@@ -30,13 +34,17 @@ add_executable(${PROJECT_NAME}
 
         src/common/modifier/MeshModifier.hpp
 
-
         src/LaplaceAnimator.h
-        src/common/Mesh.h)
+
+        src/extern/stb_image.h
+        src/extern/stb_image.cpp
+        )
 
 target_include_directories(${PROJECT_NAME} PRIVATE include
         /usr/local/include
         /Users/marcseibert/Libraries/assimp/include
+        src/exter/assimp/include
+        src/extern/eigen
         )
 
 find_package(OpenGL REQUIRED)

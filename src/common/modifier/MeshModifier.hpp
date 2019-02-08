@@ -11,7 +11,7 @@
 
 class MeshModifier {
     
-    
+    MeshModifier(Mesh)
     virtual void bindObject(Mesh &mesh) = 0;
     virtual void bindConstraints() = 0;
     virtual void computeOperator() = 0;

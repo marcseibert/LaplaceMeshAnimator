@@ -9,7 +9,7 @@
 #include <string>
 
 #include "Drawable.hpp"
-#include "ShaderManager.hpp"
+#include "../ShaderManager.hpp"
 
 using namespace std;
 using namespace glm;

@@ -2,7 +2,9 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
-#include "common/ShaderManager"
+#include "common/ShaderManager.hpp"
+#include "common/GraphicsProgram.h"
+#include "LaplaceAnimator.h"
 
 void
 die(const char* msg, int exitCode) {
@@ -46,16 +48,21 @@ int main(int argc, const char * argv[]) {
     }
 
     glfwSetInputMode(window, GLFW_STICKY_KEYS, GLFW_TRUE);
+    glEnable(GL_SCISSOR_TEST);
     glClearColor(0.0f,0.0f,0.5f,0.0f);
     glViewport(0,0,windowWidth, windowHeight);
 
+    GraphicsProgram *program = (GraphicsProgram*) new LaplaceAnimator(window);
+    program->Initialise(windowWidth, windowHeight);
     do {
-
+        program->Update();
+        program->Draw();
         glFlush();
         glfwSwapBuffers(window);
         glfwPollEvents();
     } while(!glfwWindowShouldClose(window) && glfwGetKey(window, GLFW_KEY_ESCAPE) != GLFW_PRESS);
 
+    delete program;
     glfwTerminate();
     return 0;
 }

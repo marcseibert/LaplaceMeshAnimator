@@ -3,8 +3,8 @@
 
 #include <stdio.h>
 #include <glm/glm.hpp>
-#include "shader.hpp"
-#include "Camera.hpp"
+#include "../Shader.hpp"
+#include "../Camera.hpp"
 
 using namespace glm;
 

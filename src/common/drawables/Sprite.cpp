@@ -1,7 +1,7 @@
 #include "Sprite.hpp"
 #include <vector>
-#include "Util.hpp"
-#include "ShaderManager.hpp"
+#include "../Util.hpp"
+#include "../ShaderManager.hpp"
 
 Sprite::Sprite(string const &path, float x, float y, float z, float width, float height)
 : Drawable(x,y,z) {

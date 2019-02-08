@@ -12,10 +12,11 @@ public:
     GraphicsProgram();
     GraphicsProgram(GLFWwindow *window) { this->window = window; };
 
-    virtual void Initialise() = 0;
+    virtual void Initialise(int screenWidth, int screenHeight) = 0;
     virtual void Update() = 0;
     virtual void Draw() = 0;
 
+    virtual ~GraphicsProgram() = default;
 protected:
     GLFWwindow *window;
 };
