@@ -41,6 +41,8 @@ cmake-build-*/
 # File-based project format
 *.iws
 
+# external libs
+extern/
 # IntelliJ
 out/
 

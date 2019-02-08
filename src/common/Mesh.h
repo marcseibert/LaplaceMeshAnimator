@@ -1,0 +1,8 @@
+//
+// Created by Marc Seibert on 2019-02-08.
+//
+
+#ifndef LAPLACEMESHANIMATOR_MESH_H
+#define LAPLACEMESHANIMATOR_MESH_H
+
+#endif //LAPLACEMESHANIMATOR_MESH_H
