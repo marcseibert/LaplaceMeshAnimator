@@ -4,7 +4,7 @@
 #include "../ShaderManager.hpp"
 
 Sprite::Sprite(string const &path, float x, float y, float z, float width, float height)
-: Drawable(x,y,z) {
+: SceneNode(), RenderObject() {
     
     Shader *program = ShaderManager::getProgram(SM_SPRITE_SHADER);
     unsigned int indices[6] = {
@@ -16,8 +16,8 @@ Sprite::Sprite(string const &path, float x, float y, float z, float width, float
     offsetWidth = 1;
     offsetHeight = 1;
     
-    bounds.width = width;
-    bounds.height = height;
+    mBounds.width = width;
+    mBounds.height = height;
     
     float newRectData[5 * 4] = {
         -1, -1, 0, offsetX, offsetY,
@@ -69,7 +69,7 @@ void Sprite::Draw(Camera &camera) {
     glUniform1i(glGetUniformLocation(program->ID, "tex"), 0);
     
     // CALCULATE MVP MATRIX
-    auto mvp = camera.GetCameraMatrix() * modelMatrix;
+    auto mvp = camera.GetCameraMatrix() * mSpriteMatrix;
     
     glUniformMatrix4fv(glGetUniformLocation(program->ID, "mvpMatrix"), 1, GL_FALSE, value_ptr(mvp));
 
@@ -79,6 +79,7 @@ void Sprite::Draw(Camera &camera) {
 };
 
 void Sprite::UpdateModelMatrix() {
-    modelMatrix = translate(mat4(1), transform.position);
-    modelMatrix = scale(modelMatrix, vec3(bounds.width, bounds.height, 1));
+    mSpriteMatrix = translate(mat4(1), mTransform.position);
+    //mSpriteMatrix = rotate(mat4(1), mTransform.)
+    mSpriteMatrix = globalTransform * mSpriteMatrix;
 }

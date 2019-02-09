@@ -49,7 +49,7 @@ int main(int argc, const char * argv[]) {
 
     glfwSetInputMode(window, GLFW_STICKY_KEYS, GLFW_TRUE);
     glEnable(GL_SCISSOR_TEST);
-    glClearColor(0.0f,0.0f,0.5f,0.0f);
+    glClearColor(0.0f,0.0f,0.0f,0.0f);
     glViewport(0,0,windowWidth, windowHeight);
 
     GraphicsProgram *program = (GraphicsProgram*) new LaplaceAnimator(window);

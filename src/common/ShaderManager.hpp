@@ -9,6 +9,7 @@
 
 enum ShaderType {
     SM_SPRITE_SHADER,
+    SM_SINGLE_COLOR,
     SM_NUM_ITEMS
 };
 

@@ -8,16 +8,17 @@
 #include <stdio.h>
 #include <string>
 
-#include "Drawable.hpp"
+#include "../CommonStructs.h"
 #include "../ShaderManager.hpp"
+#include "../RenderObject.h"
+#include "../SceneNode.h"
 
 using namespace std;
 using namespace glm;
 
-
-class Sprite : public Drawable {
+class Sprite : public SceneNode, public RenderObject {
 public:
-    Sprite() : Drawable() {};
+    Sprite() : SceneNode(), RenderObject() {};
     
     Sprite(string const &path) : Sprite(path, 0,0,0,1,1) {};
     Sprite(string const &path, float x, float y, float z, float width, float height);
@@ -27,10 +28,10 @@ public:
     ~Sprite() override;
     
 private:
-    Rectangle bounds;
+    Rect mBounds;
     GLuint VAO, VBO, EBO, textureID;
     float offsetX, offsetY, offsetWidth, offsetHeight;
-    mat4 modelMatrix;
+    mat4 mSpriteMatrix;
 
     void LoadTextureFromFile(string const &path);
     void UpdateModelMatrix();

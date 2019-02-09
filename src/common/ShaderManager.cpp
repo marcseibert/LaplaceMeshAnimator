@@ -18,6 +18,12 @@ void ShaderManager::init() {
     spriteShader.addShader("/Users/marcseibert/Documents/Development/Sandbox/cfx/Globe/Globe/shader/DrawableShader.vert", GL_VERTEX_SHADER);
     spriteShader.addShader("/Users/marcseibert/Documents/Development/Sandbox/cfx/Globe/Globe/shader/DrawableShader.frag", GL_FRAGMENT_SHADER);
     spriteShader.link();
+
+    auto &singleColorShader = shaderMap[SM_SINGLE_COLOR];
+    singleColorShader.init();
+    singleColorShader.addShader("/Users/marcseibert/Documents/Development/Sandbox/cfx/Globe/Globe/shader/SingleColorShader.vert", GL_VERTEX_SHADER);
+    singleColorShader.addShader("/Users/marcseibert/Documents/Development/Sandbox/cfx/Globe/Globe/shader/SingleColorShader.frag", GL_FRAGMENT_SHADER);
+    singleColorShader.link();
     
     //shaderMap[SM_SPRITE_SHADER] = spriteShader;
     

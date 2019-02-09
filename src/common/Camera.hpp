@@ -4,20 +4,13 @@
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include "SceneNode.h"
+#include "CommonStructs.h"
 
 using namespace glm;
 
-class Camera {
-private:
-
-    mat4 projectionMatrix;
-    mat4 viewMatrix;
-    
-    mat4 cameraMatrix;
-    
-    void UpdateCameraMatrix();
+class Camera : public SceneNode {
 public:
-    vec3 cameraPosition; // WORLD COORDINATES
     Camera() {};
     Camera(int screenWidth, int screenHeight, float x, float y, float z, bool orthographic=false);
     
@@ -25,7 +18,18 @@ public:
     void ApplyViewportChange(GLFWwindow* window, int width, int height);
     
     void SetRotation(float pitch, float yaw);
-    void SetPosition(float x, float y, float z);
-    void Translate(float x, float y, float z);
+    void SetViewport(float x, float y, float width, float height);
 
+    void Update() override;
+
+private:
+    void UpdateCameraMatrix();
+    void SetupProjectionMatrix();
+
+    mat4 mProjectionMatrix;
+    mat4 mViewMatrix;
+
+    mat4 mCameraMatrix;
+    bool mOrthographic;
+    Rect mViewport;
 };

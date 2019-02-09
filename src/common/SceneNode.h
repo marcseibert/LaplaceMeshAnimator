@@ -7,11 +7,21 @@
 #include <list>
 #include <glm/glm.hpp>
 #include <iostream>
+#include <glm/gtc/matrix_transform.hpp>
+
+typedef struct T {
+
+    T() :position(glm::vec3(0)), scale(glm::vec3(1)), rotation(glm::vec3(0)){};
+    T(glm::vec3 position) :position(position), scale(glm::vec3(1)), rotation(glm::vec3(0)){};
+
+    glm::vec3 position;
+    glm::vec3 scale;
+    glm::vec3 rotation;
+} Transform;
 
 class SceneNode {
 public:
-    SceneNode() : SceneNode(nullptr) { };
-    SceneNode(SceneNode *root) : mChildren(), mRoot(root), isDirty(false) { mChildren.resize(0); }
+    SceneNode() : mChildren() { mChildren.resize(0); }
 
     std::list<SceneNode*>::const_iterator GetChildren() {
         return mChildren.cbegin();
@@ -19,32 +29,80 @@ public:
 
     SceneNode* GetParent(){ return mParent; };
 
+    void SetPosition(float x, float y, float z) {
+        mTransform.position = glm::vec3(x, y, z);
+        UpdateLocalTransform();
+    };
+
+    void Translate(float x, float y, float z) {
+        mTransform.position += glm::vec3(x, y, z);
+        UpdateLocalTransform();
+    };
+
+    void SetScale(float x, float y, float z) {
+        mTransform.scale = glm::vec3(x, y, z);
+        UpdateLocalTransform();
+    };
+
+    void Scale(float x, float y, float z) {
+        mTransform.scale *= glm::vec3(x, y, z);
+        UpdateLocalTransform();
+    };
+
+    void SetRotation(float eulerX, float eulerY, float eulerZ) {
+        // TODO: IMPLEMENT ROTATION
+        UpdateLocalTransform();
+    };
+
+    void Rotate(glm::vec3 axix, float angle) {
+        // TODO: IMPLEMENT ROTATION
+        UpdateLocalTransform();
+    };
+
+    void UpdateGlobalTransform() {
+
+        globalTransform = mParent->globalTransform * localTransform;
+
+        for(auto &child : mChildren) {
+            child->UpdateGlobalTransform();
+        }
+    };
     void SetParent(SceneNode *parent) {
         mParent = parent;
+
+        parent->AddChild(this);
     };
 
-    void AddChild(SceneNode &child) {
-        mChildren.push_back(&child);
+    void AddChild(SceneNode *child) {
+        //TODO: DOES NOT CHECK IF CHILD IS ALREADY IN LIST
+        mChildren.push_back(child);
+        child->mParent = this;
     };
 
-    // FORCES ROOT NODE TO REPAINT THE WHOLE SUBTREE
-    void Repaint() {
-        if(mRoot != nullptr) {
-            mRoot->isDirty = true;
-        } else {
-            std::cout <<" REPAINT THIS BITCH " << std::endl;
-            isDirty = true;
-        }
-    }
 
-    bool IsDirty() { return isDirty; }
-    virtual void Draw(glm::mat4 parentTransform) = 0;
+    virtual void Update() = 0;
     virtual ~SceneNode() = default;
+
 protected:
-    glm::mat4 mTransform;
+    Transform mTransform;
+
+    glm::mat4 localTransform;
+    glm::mat4 globalTransform;
+
     std::list<SceneNode*> mChildren;
     SceneNode *mParent;
-    SceneNode *mRoot;
-    bool isDirty;
+
+    void UpdateLocalTransform() {
+        glm::mat4 transform = glm::mat4(1);
+
+        //transform = glm::rotate(transform, )
+        transform = glm::scale(transform, mTransform.scale);
+        transform = glm::translate(transform, mTransform.position);
+
+        localTransform = transform;
+        // ROTATION
+        // SCALE
+        // TRANSLATE
+    };
 };
 #endif //LAPLACEMESHANIMATOR_SCENENODE_H

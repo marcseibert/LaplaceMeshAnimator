@@ -28,7 +28,6 @@ add_executable(${PROJECT_NAME}
         src/common/Mesh.h
         src/common/SceneNode.h
 
-        src/common/drawables/Drawable.hpp
         src/common/drawables/Sprite.hpp
         src/common/drawables/Sprite.cpp
 
@@ -38,7 +37,7 @@ add_executable(${PROJECT_NAME}
 
         src/extern/stb_image.h
         src/extern/stb_image.cpp
-        )
+        src/common/RenderObject.h src/common/Renderer.h src/InspectorView.h)
 
 target_include_directories(${PROJECT_NAME} PRIVATE include
         /usr/local/include
