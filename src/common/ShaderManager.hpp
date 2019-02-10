@@ -1,15 +1,17 @@
 #pragma once
+#include <GL/glew.h>
+
 #include <stdio.h>
 #include <vector>
-#include <GL/glew.h>
 #include <map>
 #include <array>
 #include <string>
 #include "Shader.hpp"
 
 enum ShaderType {
-    SM_SPRITE_SHADER,
+    SM_SPRITE,
     SM_SINGLE_COLOR,
+    SM_COMPLEX_MESH,
     SM_NUM_ITEMS
 };
 

@@ -1,4 +1,5 @@
 #include "ShaderManager.hpp"
+#include <string>
 
 ShaderManager::ShaderManager() {
 };
@@ -12,22 +13,27 @@ ShaderManager::~ShaderManager() {
 Shader ShaderManager::shaderMap[SM_NUM_ITEMS];
 
 void ShaderManager::init() {
-    auto &spriteShader = shaderMap[SM_SPRITE_SHADER];
+    std::string shaderDirectory = "/Users/marcseibert/Documents/Development/git/LaplaceMeshAnimator/src/shader/";
+
+    auto &spriteShader = shaderMap[SM_SPRITE];
     
     spriteShader.init();
-    spriteShader.addShader("/Users/marcseibert/Documents/Development/Sandbox/cfx/Globe/Globe/shader/DrawableShader.vert", GL_VERTEX_SHADER);
-    spriteShader.addShader("/Users/marcseibert/Documents/Development/Sandbox/cfx/Globe/Globe/shader/DrawableShader.frag", GL_FRAGMENT_SHADER);
+    spriteShader.addShader(shaderDirectory + "DrawableShader.vert", GL_VERTEX_SHADER);
+    spriteShader.addShader(shaderDirectory + "DrawableShader.frag", GL_FRAGMENT_SHADER);
     spriteShader.link();
 
     auto &singleColorShader = shaderMap[SM_SINGLE_COLOR];
     singleColorShader.init();
-    singleColorShader.addShader("/Users/marcseibert/Documents/Development/Sandbox/cfx/Globe/Globe/shader/SingleColorShader.vert", GL_VERTEX_SHADER);
-    singleColorShader.addShader("/Users/marcseibert/Documents/Development/Sandbox/cfx/Globe/Globe/shader/SingleColorShader.frag", GL_FRAGMENT_SHADER);
+    singleColorShader.addShader(shaderDirectory + "SingleColorShader.vert", GL_VERTEX_SHADER);
+    singleColorShader.addShader(shaderDirectory + "SingleColorShader.frag", GL_FRAGMENT_SHADER);
     singleColorShader.link();
-    
-    //shaderMap[SM_SPRITE_SHADER] = spriteShader;
-    
-    std::cout << "INITED " << shaderMap[SM_SPRITE_SHADER].ID << " " << std::endl;
+
+    auto &meshShader = shaderMap[SM_COMPLEX_MESH];
+    meshShader.init();
+    meshShader.addShader(shaderDirectory + "ComplexMeshShader.vert", GL_VERTEX_SHADER);
+    meshShader.addShader(shaderDirectory + "ComplexMeshShader.frag", GL_FRAGMENT_SHADER);
+    meshShader.link();
+
 }
 
 GLuint ShaderManager::getPrgID(ShaderType type) { return shaderMap[type].ID; };

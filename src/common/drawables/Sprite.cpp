@@ -6,7 +6,7 @@
 Sprite::Sprite(string const &path, float x, float y, float z, float width, float height)
 : SceneNode(), RenderObject() {
     
-    Shader *program = ShaderManager::getProgram(SM_SPRITE_SHADER);
+    Shader *program = ShaderManager::getProgram(SM_SPRITE);
     unsigned int indices[6] = {
         0, 1, 3, 3, 1, 2
     };
@@ -62,7 +62,7 @@ Sprite::~Sprite() {
 };
 
 void Sprite::Draw(Camera &camera) {
-    Shader *program = ShaderManager::getProgram(SM_SPRITE_SHADER);
+    Shader *program = ShaderManager::getProgram(SM_SPRITE);
     program->use();
 
 

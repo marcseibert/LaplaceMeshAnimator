@@ -6,6 +6,7 @@
 #include "common/GraphicsProgram.h"
 #include "LaplaceAnimator.h"
 
+GraphicsProgram *program = nullptr;
 void
 die(const char* msg, int exitCode) {
     std::cerr << msg << std::endl;
@@ -15,6 +16,16 @@ die(const char* msg, int exitCode) {
 
 void setWindowSizeCallback(GLFWwindow *window, int width, int height) {
     glViewport(0,0,width, height);
+
+    if(program) {
+        program->OnWindowRescale(window, width, height);
+    }
+}
+
+void mouseCallback(GLFWwindow *window, double xPos, double yPos) {
+    if(program) {
+        program->OnMouseMove(window, xPos, yPos);
+    }
 }
 
 // GLOBAL VARIABLES
@@ -40,6 +51,7 @@ int main(int argc, const char * argv[]) {
 
     glfwMakeContextCurrent(window);
     glfwSetWindowSizeCallback(window, setWindowSizeCallback);
+    glfwSetCursorPosCallback(window, mouseCallback);
 
     glewExperimental = true;
 
@@ -49,10 +61,12 @@ int main(int argc, const char * argv[]) {
 
     glfwSetInputMode(window, GLFW_STICKY_KEYS, GLFW_TRUE);
     glEnable(GL_SCISSOR_TEST);
+    glEnable(GL_DEPTH_TEST);
     glClearColor(0.0f,0.0f,0.0f,0.0f);
     glViewport(0,0,windowWidth, windowHeight);
 
-    GraphicsProgram *program = (GraphicsProgram*) new LaplaceAnimator(window);
+    ShaderManager::init();
+    program = (GraphicsProgram*) new LaplaceAnimator(window);
     program->Initialise(windowWidth, windowHeight);
     do {
         program->Update();
@@ -66,3 +80,4 @@ int main(int argc, const char * argv[]) {
     glfwTerminate();
     return 0;
 }
+

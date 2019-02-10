@@ -6,10 +6,12 @@
 #define LAPLACEMESHANIMATOR_LAPLACEANIMATOR_H
 
 #include "common/GraphicsProgram.h"
-#include "common/View.h"
 #include "InspectorView.h"
-
+#include "SceneView.h"
+#include <cmath>
 #include <iostream>
+#include <algorithm>
+#include "common/input/MouseInput.h"
 
 class LaplaceAnimator : public GraphicsProgram {
 public:
@@ -17,29 +19,36 @@ public:
 
     void Initialise(int screenWidth, int screenHeight) override {
 
-        sceneView = View(0, 0, screenWidth / 2, screenHeight);
-        inspector= InspectorView(screenWidth / 2,0, screenWidth / 2, screenHeight);
+        int sceneWidth =  (screenWidth < inspectorSize) ? 0 : screenWidth - inspectorSize;
+        mouse = MouseInput(screenWidth, screenHeight, Rect(), 5.0f);
 
-        std::cout << " " << screenWidth / 2 << std::endl;
-
-
-        sceneView.SetClearColor(glm::vec4(1,0,0,1));
-        sceneView.Repaint();
+        scene = SceneView(0, 0, sceneWidth, screenHeight, &mouse);
+        inspector= InspectorView(sceneWidth, 0 , inspectorSize, screenHeight, &mouse);
 
         glClearColor(0,0,0,1);
     };
 
     void Update() override {
-        sceneView.Update();
+        double currentTime = glfwGetTime();
+        double deltaTime = abs(currentTime - oldTime);
+        oldTime = currentTime;
+        mouse.Update(window);
 
-        inspector.Update();
+        mouse.SetViewport(scene.GetViewport());
+        auto mousePosition = mouse.GetPosition();
+        //std::cout << "mouse-x: " << mousePosition.x << " mouse-y: " << mousePosition.y << " pressed: " << mouse.IsPressed() << " dragged: " << mouse.IsDragged() << std::endl;
+
+        scene.Update(window, deltaTime);
+
+        inspector.Update(window, deltaTime);
     };
 
     void Draw() override {
+
         glClear(GL_COLOR_BUFFER_BIT);
         // ONLY REDRAW IF NEEDED
-        if(sceneView.IsDirty()) {
-            sceneView.Draw();
+        if(scene.IsDirty()) {
+            scene.Draw();
         }
 
         if(inspector.IsDirty()) {
@@ -47,13 +56,35 @@ public:
         }
     };
 
+    void OnWindowRescale(GLFWwindow *window, int screenWidth, int screenHeight) override {
+
+        int sceneWidth =  (screenWidth < inspectorSize) ? 0 : screenWidth - inspectorSize;
+        scene.SetBounds(0, 0, sceneWidth, screenHeight);
+        scene.Repaint();
+        inspector.SetBounds(sceneWidth , 0 , inspectorSize, screenHeight);
+        inspector.Repaint();
+
+        scene.UpdateWindowParameters();
+        inspector.UpdateWindowParameters();
+    };
+
+    void OnMouseMove(GLFWwindow* window, double xPos, double yPos) override {
+        mouse.OnMouseMove(window, xPos, yPos);
+
+        //std::cout << xPos << " || " << yPos << std::endl;
+    };
+
     ~LaplaceAnimator() override {
 
     };
 
 private:
-    View sceneView;
+    SceneView scene;
     InspectorView inspector;
+    MouseInput mouse;
+
+    double oldTime;
+    int inspectorSize = 200;
 };
 
 

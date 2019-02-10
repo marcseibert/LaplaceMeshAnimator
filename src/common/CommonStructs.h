@@ -3,13 +3,19 @@
 #define LAPLACEMESHANIMATOR_COMMONSTRUCTS_H
 
 #include <glm/glm.hpp>
+#include <string>
 
-using namespace glm;
 typedef struct {
-    vec3 position;
-    vec3 normal;
-    vec2 texCoords;
+    glm::vec3 Position;
+    glm::vec3 Normal;
+    glm::vec2 TexCoords;
 } Vertex;
+
+typedef struct {
+    unsigned int id;
+    std::string type;
+    std::string path;
+} Texture;
 
 typedef struct R {
 
@@ -19,11 +25,8 @@ typedef struct R {
     width(width),
     height(height) { };
 
-    vec2 position;
+    glm::vec2 position;
     float width, height;
 } Rect;
 
-typedef struct {
-
-} Texture;
 #endif //LAPLACEMESHANIMATOR_COMMONSTRUCTS_H

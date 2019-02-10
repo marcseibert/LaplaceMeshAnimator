@@ -8,7 +8,6 @@
 Box::Box(Rect rect, glm::vec4 color)
 : SceneNode(), RenderObject() {
     
-    Shader *program = ShaderManager::getProgram(SM_SPRITE_SHADER);
     unsigned int indices[6] = {
         0, 1, 3, 3, 1, 2
     };

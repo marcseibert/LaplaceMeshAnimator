@@ -25,19 +25,29 @@ add_executable(${PROJECT_NAME}
         src/common/ShaderManager.cpp
         src/common/Util.hpp
         src/common/Util.cpp
-        src/common/Mesh.h
         src/common/SceneNode.h
 
         src/common/drawables/Sprite.hpp
         src/common/drawables/Sprite.cpp
-
+        src/common/drawables/Box.hpp
+        src/common/drawables/Box.cpp
+        src/common/drawables/Mesh.h
+        src/common/drawables/Mesh.cpp
+        src/common/drawables/Model.hpp
+        src/common/drawables/Model.cpp
         src/common/modifier/MeshModifier.hpp
 
         src/LaplaceAnimator.h
 
         src/extern/stb_image.h
         src/extern/stb_image.cpp
-        src/common/RenderObject.h src/common/Renderer.h src/InspectorView.h)
+        src/common/RenderObject.h
+        src/common/Renderer.h
+        src/InspectorView.h
+        src/SceneView.h
+        src/common/input/MouseInput.h
+        src/common/DraggableObject.h
+        )
 
 target_include_directories(${PROJECT_NAME} PRIVATE include
         /usr/local/include
