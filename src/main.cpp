@@ -2,7 +2,7 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
-#include "common/ShaderManager.hpp"
+#include "common/ShaderManager.h"
 #include "common/GraphicsProgram.h"
 #include "LaplaceAnimator.h"
 

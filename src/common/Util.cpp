@@ -1,4 +1,4 @@
-#include "Util.hpp"
+#include "Util.h"
 #include <string>
 #include <iostream>
 #include "../extern/stb_image.h"

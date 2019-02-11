@@ -1,6 +1,6 @@
-#include "EditableMesh.hpp"
+#include "EditableMesh.h"
 
-#include "Mesh.hpp"
+#include "Mesh.h"
 #include <iostream>
 
 EditableMesh::EditableMesh(vector<Vertex> vertices, vector<unsigned int> indices, vector<Texture> textures) {

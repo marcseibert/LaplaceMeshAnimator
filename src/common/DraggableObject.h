@@ -2,7 +2,7 @@
 // Created by Marc Seibert on 2019-02-09.
 //
 #pragma once
-#include "Camera.hpp"
+#include "Camera.h"
 #include <glm/glm.hpp>
 
 class DraggableObject {

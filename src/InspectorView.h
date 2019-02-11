@@ -6,7 +6,7 @@
 #define LAPLACEMESHANIMATOR_INSPECTORVIEW_H
 
 #include "common/View.h"
-#include "common/drawables/Box.hpp"
+#include "common/drawables/Box.h"
 #include "common/Renderer.h"
 #include "common/input/MouseInput.h"
 
@@ -23,14 +23,16 @@ public:
 
         // DEFINE UI OBJECTS HERE
         mainCamera = Camera(viewWidth, viewHeight,0,0, -5, true);
-        testBox = Box(Rect(0, 0, 100.0f, 100.0f), glm::vec4(1,1,0,1));
+        testBox = Box(Rect(0, 0, 200.0f, 200.0f), glm::vec4(1,1,0,1));
 
         testBox.UpdateGlobalTransform();
     };
 
 
     void Update(GLFWwindow *window, float deltaTime) override {
-
+        if(!mActive) {
+            return;
+        }
 
         mainCamera.Update(window, deltaTime);
     };
@@ -38,7 +40,12 @@ public:
     void Draw() override {
         SetViewport();
 
-        glClearColor(mClearColor.r, mClearColor.g, mClearColor.b, mClearColor.a);
+        if(mActive) {
+
+            glClearColor(1.0, 1.0, 0.95, mClearColor.a);
+        } else {
+            glClearColor(mClearColor.r, mClearColor.g, mClearColor.b, mClearColor.a);
+        }
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         renderer.Draw(mBounds, mainCamera, testBox);

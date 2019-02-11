@@ -4,7 +4,7 @@
 
 #ifndef LAPLACEMESHANIMATOR_RENDEROBJECT_H
 #define LAPLACEMESHANIMATOR_RENDEROBJECT_H
-#include "Camera.hpp"
+#include "Camera.h"
 
 class RenderObject {
 public:

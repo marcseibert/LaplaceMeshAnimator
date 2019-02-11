@@ -36,8 +36,16 @@ public:
 
         mouse.SetViewport(scene.GetViewport());
         auto mousePosition = mouse.GetPosition();
-        //std::cout << "mouse-x: " << mousePosition.x << " mouse-y: " << mousePosition.y << " pressed: " << mouse.IsPressed() << " dragged: " << mouse.IsDragged() << std::endl;
+        std::cout << "mouse-x: " << mousePosition.x << " mouse-y: " << mousePosition.y << " pressed: " << mouse.IsPressed(MOUSE_BUTTON_LEFT) << " dragged: " << mouse.IsDragged() << std::endl;
 
+
+        if(mouse.IsNewPressed(MOUSE_BUTTON_LEFT)) {
+
+            std::cout << "CLICK" << std::endl;
+            scene.SetActive(scene.InsideRect(glm::vec3(mousePosition, 0)));
+
+            inspector.SetActive(inspector.InsideRect(glm::vec3(mousePosition, 0)));
+        }
         scene.Update(window, deltaTime);
 
         inspector.Update(window, deltaTime);

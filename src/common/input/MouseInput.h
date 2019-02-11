@@ -22,18 +22,27 @@ public:
     : mViewport(viewport), mScreenWidth(screenWidth), mScreenHeight(screenHeight), mDragSensitivity(dragSensitifity) { };
 
     void Update(GLFWwindow *window) {
+        // CHECK FOR NEW BUTTON PRESSES
+        mNewPressed[MOUSE_BUTTON_LEFT]   = !mPressed[MOUSE_BUTTON_LEFT] && glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_1) == GLFW_PRESS;
+        mNewPressed[MOUSE_BUTTON_RIGHT]  = !mPressed[MOUSE_BUTTON_RIGHT] && glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_2) == GLFW_PRESS;
+        mNewPressed[MOUSE_BUTTON_CENTER] = !mPressed[MOUSE_BUTTON_CENTER] && glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_3) == GLFW_PRESS;
 
-        if(glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_3) == GLFW_PRESS) {
-            if(!mPressed[MOUSE_BUTTON_CENTER]) {
+        // BUTTON IS STILL PRESSED IF OLD AND NEW STATE ARE BOTH TRUE
+        mPressed[MOUSE_BUTTON_LEFT]   = glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_1) == GLFW_PRESS;
+        mPressed[MOUSE_BUTTON_RIGHT]  = glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_2) == GLFW_PRESS;
+        mPressed[MOUSE_BUTTON_CENTER] = glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_3) == GLFW_PRESS;
+
+        if(mPressed[MOUSE_BUTTON_CENTER]) {
+            if(mNewPressed[MOUSE_BUTTON_CENTER]) {
                 mDragOrigin = mPosition;
 
-                mPressed[MOUSE_BUTTON_CENTER] = true;
                 mDrag = false;
             }
         } else {
-            mPressed[MOUSE_BUTTON_CENTER] = false;
             mDrag = false;
         }
+
+        // UPDATE MOUSE STATES
     };
 
     void OnMouseMove(GLFWwindow *window, double xPos, double yPos) {
@@ -62,16 +71,20 @@ public:
         return mDrag;
     };
 
+    bool IsNewPressed(ButtonType button) {
+        return mNewPressed[button];
+    }
+
     bool IsPressed(ButtonType button) {
         return mPressed[button];
     }
 
     glm::dvec2 GetPosition() {
-        return ClampPosition(mPosition);
+        return mPosition; //ClampPosition(mPosition);
     };
 
     glm::dvec2 GetDrag() {
-        return ClampPosition(mDragVector);
+        return mDragVector;//ClampPosition(mDragVector);
     };
 
 
@@ -81,7 +94,10 @@ private:
     float mDragSensitivity;
     float mScreenWidth, mScreenHeight;
     Rect mViewport;
+
+    bool mNewPressed[NUM_BUTTON_TYPES];
     bool mPressed[NUM_BUTTON_TYPES];
+
     bool mDrag;
     glm::dvec2 mDragOrigin;
 

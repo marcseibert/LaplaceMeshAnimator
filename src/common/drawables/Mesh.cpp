@@ -82,3 +82,11 @@ std::vector<Vertex>* Mesh::GetVertices() {
 std::vector<glm::uvec3>* Mesh::GetFaces() {
     return &faces;
 }
+
+bool Mesh::RayIntersects(glm::vec4 ray) {
+    return false;
+}
+
+vec3 Mesh::RayIntersectsAt(glm::vec4 ray) {
+    return glm::vec3(1);
+}

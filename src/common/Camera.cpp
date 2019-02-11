@@ -1,4 +1,4 @@
-#include "Camera.hpp"
+#include "Camera.h"
 
 //#include <iostream>
 #define GLM_ENABLE_EXPERIMENTAL
@@ -67,14 +67,17 @@ void Camera::UpdateCameraMatrix() {
         std::cout << " Drag vector " << glm::to_string(mDragVector) << " local Pos " << to_string(mTransform.position + mDragVector) << std::endl;//glm::to_string(globalPosition) << std::endl;
     } */
 
-    glm::mat4 viewMatrix = glm::lookAt(glm::vec3(globalPosition), glm::vec3(globalPosition) + glm::vec3(0, 0, 1), glm::vec3(0,1,0));
-    mCameraMatrix = mProjectionMatrix * viewMatrix;//* globalTransform;
+    mViewMatrix = glm::lookAt(glm::vec3(globalPosition), glm::vec3(globalPosition) + glm::vec3(0, 0, 1), glm::vec3(0,1,0));
+    mCameraMatrix = mProjectionMatrix * mViewMatrix;//* globalTransform;
 }
 
 void Camera::SetupProjectionMatrix() {
 
     if(mOrthographic) {
-        mProjectionMatrix = ortho(-((float) mViewport.width/2.0f),((float) mViewport.width/2.0f), -((float) mViewport.height/2.0f),((float) mViewport.height/2.0f), 0.1f, 10000.0f);
+        //mProjectionMatrix = ortho(-((float) mViewport.width/2.0f),((float) mViewport.width/2.0f), -((float) mViewport.height/2.0f),((float) mViewport.height/2.0f), 0.1f, 10000.0f);
+        // USE NORMALISED WORLD COORDINATES
+        float ratio = (float) mViewport.height / mViewport.width;
+        mProjectionMatrix = ortho(-1.0f, 1.0f, -ratio, ratio, 0.1f, 1000.0f);
     } else{
         mProjectionMatrix = perspective(radians(60.0f), (float)mViewport.width / mViewport.height, 0.1f, 10000.0f);
     }
@@ -90,3 +93,28 @@ void Camera::ApplyDrag() {
 
     UpdateCameraMatrix();
 }
+
+
+glm::vec3 Camera::ScreenToWorldSpace(glm::vec3 coords) {
+    float aspectRatio = mViewport.height / mViewport.width;
+
+    // SCREENS SPACE - 0,0 IN TOP LEFT CORNER
+    return glm::vec3((coords.x / mViewport.width)*2, (coords.y/ mViewport.height) * 2 * aspectRatio, coords.z);
+}
+
+glm::vec3 Camera::ScreenPointToRay(glm::vec2 point) {
+    float x = (2.0f * point.x) / mViewport.width - 1.0f;
+    float y = 1.0f - (2.0f * point.y) / mViewport.height;
+
+    glm::vec4 ray = glm::vec4(x, y, -1.0f, 1.0f);
+
+    glm::vec4 rayEye = glm::inverse(mProjectionMatrix) * ray;
+    rayEye = glm::vec4(rayEye.x, rayEye.y, -1.0f, 0.0);
+
+    glm::vec3 rayWorld = glm::vec3(inverse(mViewMatrix) * rayEye);
+
+    rayWorld = glm::normalize(rayWorld);
+
+    std::cout << glm::to_string(rayWorld) << std::endl;
+    return rayWorld;
+};

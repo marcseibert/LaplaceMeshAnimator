@@ -18,24 +18,24 @@ add_executable(${PROJECT_NAME}
         src/common/View.h
         src/common/CommonStructs.h
         src/common/GraphicsProgram.h
-        src/common/Camera.hpp
+        src/common/Camera.h
         src/common/Camera.cpp
-        src/common/Shader.hpp
-        src/common/ShaderManager.hpp
+        src/common/Shader.h
+        src/common/ShaderManager.h
         src/common/ShaderManager.cpp
-        src/common/Util.hpp
+        src/common/Util.h
         src/common/Util.cpp
         src/common/SceneNode.h
 
-        src/common/drawables/Sprite.hpp
+        src/common/drawables/Sprite.h
         src/common/drawables/Sprite.cpp
-        src/common/drawables/Box.hpp
+        src/common/drawables/Box.h
         src/common/drawables/Box.cpp
         src/common/drawables/Mesh.h
         src/common/drawables/Mesh.cpp
-        src/common/drawables/Model.hpp
+        src/common/drawables/Model.h
         src/common/drawables/Model.cpp
-        src/common/modifier/MeshModifier.hpp
+        src/common/modifier/MeshModifier.h
 
         src/LaplaceAnimator.h
 
@@ -47,7 +47,7 @@ add_executable(${PROJECT_NAME}
         src/SceneView.h
         src/common/input/MouseInput.h
         src/common/DraggableObject.h
-        )
+        src/common/collision/Raycaster.h src/common/input/MouseHook.h src/common/collision/IntersectionRect.h src/common/collision/IntersectionMesh.h)
 
 target_include_directories(${PROJECT_NAME} PRIVATE include
         /usr/local/include

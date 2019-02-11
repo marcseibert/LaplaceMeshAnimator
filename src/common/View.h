@@ -12,14 +12,14 @@
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 #include "input/MouseInput.h"
-
-class View : public SceneNode{
+#include "collision/IntersectionRect.h"
+class View : public SceneNode, public IntersectionRect {
 public:
 
-    View() : SceneNode(), mDirty(false){ };
+    View() : SceneNode(), mDirty(false), mActive(false) { };
 
     View(float x, float y, float width, float height, MouseInput *mouseInput)
-    : SceneNode(), mBounds(Rect(x, y, width, height)), mDirty(false), mouseInput(mouseInput) { };
+    : SceneNode(), mBounds(Rect(x, y, width, height)), mDirty(false), mActive(false), mouseInput(mouseInput) { };
 
     Rect GetBounds() { return mBounds; };
 
@@ -49,8 +49,18 @@ public:
     };
 
     Rect GetViewport() { return mBounds; }
+    void SetActive(bool b) {
+        mActive = b;
+    }
 
+    bool IsActive() { return mActive; };
     bool IsDirty() { return mDirty; };
+
+    // WORKS IN SCREEN SPACE
+    bool InsideRect(glm::vec3 point) override {
+        return mBounds.position.x <= point.x && (mBounds.position.x + mBounds.width) >= point.x
+        && mBounds.position.y <= point.y && mBounds.position.y + mBounds.height >= point.y;
+    };
 
     virtual void UpdateWindowParameters() = 0;
     ~View() override {
@@ -60,6 +70,7 @@ protected:
     Rect mBounds;
     glm::vec4 mClearColor;
     bool mDirty;
+    bool mActive;
 
     void SetViewport() {
         glScissor(mBounds.position.x, mBounds.position.y, mBounds.width, mBounds.height);

@@ -1,7 +1,7 @@
-#include "Box.hpp"
+#include "Box.h"
 #include <vector>
-#include "../Util.hpp"
-#include "../ShaderManager.hpp"
+#include "../Util.h"
+#include "../ShaderManager.h"
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/string_cast.hpp>
 
@@ -48,7 +48,6 @@ Box::Box(Rect rect, glm::vec4 color)
 
     glBindVertexArray(0);
     
-    UpdateModelMatrix();
 };
 
 Box::~Box() {
@@ -60,6 +59,8 @@ void Box::Update(GLFWwindow *window, float deltaTime) {
 }
 
 void Box::Draw(Camera &camera) {
+
+    UpdateModelMatrix(camera.GetViewport());
     Shader *program = ShaderManager::getProgram(SM_SINGLE_COLOR);
     program->use();
 
@@ -79,7 +80,10 @@ void Box::Draw(Camera &camera) {
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, (void*)0);
 };
 
-void Box::UpdateModelMatrix() {
+void Box::UpdateModelMatrix(Rect viewport) {
+    float bRatio = bounds.height / bounds.width;
+    float relativeWidth = bounds.width/ viewport.width;
+
     modelMatrix = translate(mat4(1), glm::vec3(bounds.position.x, bounds.position.y, 0));
-    modelMatrix = scale(modelMatrix, vec3(bounds.width, bounds.height, 1));
+    modelMatrix = scale(modelMatrix, vec3(relativeWidth, relativeWidth * bRatio, 1));
 }

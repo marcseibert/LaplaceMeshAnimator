@@ -13,11 +13,12 @@
 #include "../CommonStructs.h"
 #include "../SceneNode.h"
 #include "../RenderObject.h"
-#include "../Camera.hpp"
-#include "../ShaderManager.hpp"
+#include "../Camera.h"
+#include "../ShaderManager.h"
 #include <GLFW/glfw3.h>
+#include "../collision/IntersectionMesh.h"
 
-class Mesh : public SceneNode, public RenderObject {
+class Mesh : public SceneNode, public RenderObject, public IntersectionMesh {
 public:
     Mesh() = default;
 
@@ -28,6 +29,10 @@ public:
 
     std::vector<Vertex> *GetVertices();
     std::vector<glm::uvec3> *GetFaces();
+
+    bool RayIntersects(glm::vec4 ray) override;
+
+    glm::vec3 RayIntersectsAt(glm::vec4 ray) override;
 private:
     std::vector<Vertex> vertices;
     std::vector<glm::uvec3> faces;

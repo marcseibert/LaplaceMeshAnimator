@@ -1,7 +1,7 @@
-#include "Sprite.hpp"
+#include "Sprite.h"
 #include <vector>
-#include "../Util.hpp"
-#include "../ShaderManager.hpp"
+#include "../Util.h"
+#include "../ShaderManager.h"
 
 Sprite::Sprite(string const &path, float x, float y, float z, float width, float height)
 : SceneNode(), RenderObject() {
