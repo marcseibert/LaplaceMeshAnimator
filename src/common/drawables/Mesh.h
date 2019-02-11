@@ -26,6 +26,7 @@ public:
 
     void Update(GLFWwindow *window, float deltaTime) override;
     void Draw(Camera &camera) override;
+    void DrawCall(Camera &camera, Shader &shader);
 
     std::vector<Vertex> *GetVertices();
     std::vector<glm::uvec3> *GetFaces();
@@ -33,13 +34,13 @@ public:
     bool RayIntersects(glm::vec4 ray) override;
 
     glm::vec3 RayIntersectsAt(glm::vec4 ray) override;
-private:
-    std::vector<Vertex> vertices;
-    std::vector<glm::uvec3> faces;
-    std::vector<Texture> textures;
+
+    std::vector<Vertex> mVertices;
+    std::vector<glm::uvec3> mFaces;
+    std::vector<Texture> mTextures;
 
     GLuint VAO, VBO, EBO;
-
+private:
     void setupMesh();
 };
 

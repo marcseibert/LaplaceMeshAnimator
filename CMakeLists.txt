@@ -27,6 +27,7 @@ add_executable(${PROJECT_NAME}
         src/common/Util.cpp
         src/common/SceneNode.h
 
+
         src/common/drawables/Sprite.h
         src/common/drawables/Sprite.cpp
         src/common/drawables/Box.h
@@ -36,6 +37,8 @@ add_executable(${PROJECT_NAME}
         src/common/drawables/Model.h
         src/common/drawables/Model.cpp
         src/common/modifier/MeshModifier.h
+        src/common/modifier/EditableMesh.h
+        src/common/modifier/EditableMesh.cpp
 
         src/LaplaceAnimator.h
 
@@ -47,7 +50,10 @@ add_executable(${PROJECT_NAME}
         src/SceneView.h
         src/common/input/MouseInput.h
         src/common/DraggableObject.h
-        src/common/collision/Raycaster.h src/common/input/MouseHook.h src/common/collision/IntersectionRect.h src/common/collision/IntersectionMesh.h)
+        src/common/collision/Raycaster.h
+        src/common/input/MouseHook.h
+        src/common/collision/IntersectionRect.h
+        src/common/collision/IntersectionMesh.h src/common/modifier/EditableModel.h src/common/RenderIDObject.h)
 
 target_include_directories(${PROJECT_NAME} PRIVATE include
         /usr/local/include

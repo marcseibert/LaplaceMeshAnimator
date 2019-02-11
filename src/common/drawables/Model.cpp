@@ -14,19 +14,16 @@ void Model::Draw(Camera &camera)
 // loads a model with supported ASSIMP extensions from file and stores the resulting meshes in the meshes vector.
 void Model::loadModel(std::string const &path)
 {
-    // read file via ASSIMP
     Assimp::Importer importer;
     const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
-    // check for errors
+
     if(!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) // if is Not Zero
     {
         std::cout << "ERROR::ASSIMP:: " << importer.GetErrorString() << std::endl;
         return;
     }
-    // retrieve the directory path of the filepath
     directory = path.substr(0, path.find_last_of('/'));
-    
-    // process ASSIMP's root node recursively
+
     processNode(scene->mRootNode, this, scene);
 
 }
@@ -91,7 +88,6 @@ Mesh Model::processMesh(aiMesh *mesh, const aiScene *scene)
     {
         aiFace face = mesh->mFaces[i];
         faces.push_back(glm::uvec3(face.mIndices[0], face.mIndices[1], face.mIndices[2]));
-        std::cout << " wwwarn " << face.mIndices[0] << " " << face.mIndices[1] << " " << face.mIndices[2] << std::endl;
     }
 
     aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
@@ -136,7 +132,7 @@ std::vector<Texture> Model::loadMaterialTextures(aiMaterial *mat, aiTextureType 
             texture.type = typeName;
             texture.path = str.C_Str();
             textures.push_back(texture);
-            textures_loaded.push_back(texture);  // store it as texture loaded for entire model, to ensure we won't unnecesery load duplicate textures.
+            textures_loaded.push_back(texture);  // store it as texture loaded for entire model, to ensure we won't unnecesery load duplicate mTextures.
         }
     }
     return textures;

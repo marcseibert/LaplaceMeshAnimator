@@ -22,8 +22,8 @@ public:
         int sceneWidth =  (screenWidth < inspectorSize) ? 0 : screenWidth - inspectorSize;
         mouse = MouseInput(screenWidth, screenHeight, Rect(), 5.0f);
 
-        scene = SceneView(0, 0, sceneWidth, screenHeight, &mouse);
-        inspector= InspectorView(sceneWidth, 0 , inspectorSize, screenHeight, &mouse);
+        scene = SceneView(window, 0, 0, sceneWidth, screenHeight, &mouse);
+        inspector= InspectorView(window, sceneWidth, 0 , inspectorSize, screenHeight, &mouse);
 
         glClearColor(0,0,0,1);
     };
@@ -36,7 +36,7 @@ public:
 
         mouse.SetViewport(scene.GetViewport());
         auto mousePosition = mouse.GetPosition();
-        std::cout << "mouse-x: " << mousePosition.x << " mouse-y: " << mousePosition.y << " pressed: " << mouse.IsPressed(MOUSE_BUTTON_LEFT) << " dragged: " << mouse.IsDragged() << std::endl;
+        //std::cout << "mouse-x: " << mousePosition.x << " mouse-y: " << mousePosition.y << " pressed: " << mouse.IsPressed(MOUSE_BUTTON_LEFT) << " dragged: " << mouse.IsDragged() << std::endl;
 
 
         if(mouse.IsNewPressed(MOUSE_BUTTON_LEFT)) {

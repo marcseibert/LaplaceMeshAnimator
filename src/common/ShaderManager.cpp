@@ -34,6 +34,12 @@ void ShaderManager::init() {
     meshShader.addShader(shaderDirectory + "ComplexMeshShader.frag", GL_FRAGMENT_SHADER);
     meshShader.link();
 
+    auto &codeShader = shaderMap[SM_CODE];
+    codeShader.init();
+    codeShader.addShader(shaderDirectory + "ComplexMeshShader.vert", GL_VERTEX_SHADER);
+    codeShader.addShader(shaderDirectory + "CodeShader.frag", GL_FRAGMENT_SHADER);
+    codeShader.link();
+
 }
 
 GLuint ShaderManager::getPrgID(ShaderType type) { return shaderMap[type].ID; };

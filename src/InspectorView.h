@@ -14,8 +14,8 @@ class InspectorView : public View {
 public:
     InspectorView() : View() { };
 
-    InspectorView(float viewX, float viewY, float viewWidth, float viewHeight, MouseInput* mouseInput)
-    : View(viewX, viewY, viewWidth, viewHeight, mouseInput) {
+    InspectorView(GLFWwindow *window, float viewX, float viewY, float viewWidth, float viewHeight, MouseInput* mouseInput)
+    : View(viewX, viewY, viewWidth, viewHeight, mouseInput), renderer(window) {
 
         SetClearColor(glm::vec4(1,0,1,1));
         Repaint();

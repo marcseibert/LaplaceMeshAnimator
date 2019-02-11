@@ -50,7 +50,29 @@ unsigned int TextureFromFile(std::string const &filename, bool gamma)
         stbi_image_free(data);
     }
     
-    std::cout << " LOADED IMAGE " << width << "x" << height << " " << textureID <<std::endl;
+    //std::cout << " LOADED IMAGE " << width << "x" << height << " " << textureID <<std::endl;
     
     return textureID;
+}
+unsigned int uiTranslateColorCode(glm::vec4 colorCode) {
+    return ((unsigned int)colorCode.y + (unsigned int)colorCode.x * 255) * 255 + (unsigned int)colorCode.z;
+};
+
+glm::ivec4 TranslateToColorCode(unsigned int code) {
+    glm::ivec4 colorCode(1);
+    if(code >= 255 * 255 * 255) {
+        std::cout << "ERROR: Color Code Range exceeded! " << code << std::endl;
+        return glm::ivec4(1, 0, 1, 1);
+    }
+
+    colorCode.z = code % 255;
+    code = code / 255;
+
+    colorCode.y = code % 255;
+    code = code / 255;
+
+    colorCode.x = code % 255;
+    code = code / 255;
+
+    return colorCode;
 }

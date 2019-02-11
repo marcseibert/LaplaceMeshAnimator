@@ -27,7 +27,7 @@ public:
     SceneNode() : mChildren(), localTransform(1), globalTransform(1), mParent(nullptr) { mChildren.resize(0); }
     // INIT WITH POSITION
     SceneNode(float x, float y, float z) : mChildren(), localTransform(1), globalTransform(1), mTransform(glm::vec3(x, y, z)), mParent(
-            nullptr) { mChildren.resize(0);}
+            nullptr) { UpdateLocalTransform(); mChildren.resize(0);}
 
     std::vector<SceneNode*>::const_iterator GetChildren() {
         return mChildren.cbegin();
@@ -103,6 +103,9 @@ public:
     virtual void Update(GLFWwindow *window, float deltaTime) = 0;
     virtual ~SceneNode() = default;
 
+    glm::mat4 GetGlobalTransform() {
+        return globalTransform;
+    };
 protected:
     Transform mTransform;
 

@@ -4,9 +4,9 @@
 
 Mesh::Mesh(std::vector<Vertex> &vertices, std::vector<glm::uvec3> &faces, std::vector<Texture> &textures)
 : SceneNode(0, 0, 0), RenderObject() {
-    this->vertices = vertices;
-    this->faces = faces;
-    this->textures = textures;
+    this->mVertices = vertices;
+    this->mFaces = faces;
+    this->mTextures = textures;
 
     setupMesh();
 }
@@ -19,10 +19,10 @@ void Mesh::setupMesh() {
 
     glBindVertexArray(VAO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex), &vertices[0], GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, mVertices.size() * sizeof(Vertex), &mVertices[0], GL_STATIC_DRAW);
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, faces.size() * sizeof(glm::uvec3), &faces[0], GL_STATIC_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, mFaces.size() * sizeof(glm::uvec3), &mFaces[0], GL_STATIC_DRAW);
 
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)0);
@@ -46,12 +46,12 @@ void Mesh::Draw(Camera &camera) {
 
     unsigned int diffuseNr = 1;
     unsigned int specularNr = 1;
-    for(unsigned int i = 0; i < textures.size(); i++)
+    for(unsigned int i = 0; i < mTextures.size(); i++)
     {
         glActiveTexture(GL_TEXTURE0 + i); // activate proper texture unit before binding
         // retrieve texture number (the N in diffuse_textureN)
         std::string number;
-        std::string name = textures[i].type;
+        std::string name = mTextures[i].type;
         if(name == "texture_diffuse"){
             //cout << " DRAWING TEXTURE " << diffuseNr << std::endl;
             number = std::to_string(diffuseNr++);
@@ -61,26 +61,29 @@ void Mesh::Draw(Camera &camera) {
 
         glUniform1i(glGetUniformLocation(shader->ID, ("material." + name + number).c_str()), i);
         //std::cout << ("material." + name + number).c_str() << " " << glGetUniformLocation(shader->ID, ("material." + name + number).c_str()) << " TEX POS" << std::endl;
-        glBindTexture(GL_TEXTURE_2D, textures[i].id);
+        glBindTexture(GL_TEXTURE_2D, mTextures[i].id);
     }
 
-    auto mvp = camera.GetCameraMatrix() * globalTransform; // localTransform;//glm::scale(localTransform, glm::vec3(10,10,10));//globalTransform;
-    glUniformMatrix4fv(glGetUniformLocation(shader->ID, "mvpMatrix"), 1, GL_FALSE, glm::value_ptr(mvp));
-
-    // draw mesh
-    glBindVertexArray(VAO);
-    glDrawElements(GL_TRIANGLES, faces.size() * 3, GL_UNSIGNED_INT, 0);
-    glBindVertexArray(0);
-
+    DrawCall(camera, *shader);
     glActiveTexture(GL_TEXTURE0);
 }
 
+void Mesh::DrawCall(Camera &camera, Shader &shader) {
+    auto mvp = camera.GetCameraMatrix() * globalTransform; // localTransform;//glm::scale(localTransform, glm::vec3(10,10,10));//globalTransform;
+    glUniformMatrix4fv(glGetUniformLocation(shader.ID, "mvpMatrix"), 1, GL_FALSE, glm::value_ptr(mvp));
+
+    // draw mesh
+    glBindVertexArray(VAO);
+    glDrawElements(GL_TRIANGLES, mFaces.size() * 3, GL_UNSIGNED_INT, 0);
+    glBindVertexArray(0);
+}
+
 std::vector<Vertex>* Mesh::GetVertices() {
-    return &vertices;
+    return &mVertices;
 }
 
 std::vector<glm::uvec3>* Mesh::GetFaces() {
-    return &faces;
+    return &mFaces;
 }
 
 bool Mesh::RayIntersects(glm::vec4 ray) {

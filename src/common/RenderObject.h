@@ -11,4 +11,5 @@ public:
     RenderObject() = default;
     virtual void Draw(Camera &camera) = 0;
 };
+
 #endif //LAPLACEMESHANIMATOR_RENDEROBJECT_H
