@@ -15,7 +15,7 @@ public:
     InspectorView() : View() { };
 
     InspectorView(GLFWwindow *window, float viewX, float viewY, float viewWidth, float viewHeight, MouseInput* mouseInput)
-    : View(viewX, viewY, viewWidth, viewHeight, mouseInput), renderer(window) {
+    : View(viewX, viewY, viewWidth, viewHeight, mouseInput), renderer(window, Rect(viewX, viewY, viewWidth, viewHeight)) {
 
         SetClearColor(glm::vec4(1,0,1,1));
         Repaint();
@@ -48,11 +48,12 @@ public:
         }
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        renderer.Draw(mBounds, mainCamera, testBox);
+        renderer.Draw(mainCamera, testBox);
     };
 
     void UpdateWindowParameters() override {
         //mainCamera.SetViewport(mBounds.position.x, mBounds.position.x, mBounds.width, mBounds.height);
+        renderer.SetViewport(mBounds);
     };
 
 

@@ -40,6 +40,11 @@ void ShaderManager::init() {
     codeShader.addShader(shaderDirectory + "CodeShader.frag", GL_FRAGMENT_SHADER);
     codeShader.link();
 
+    auto &multiColorShader = shaderMap[SM_MULTI_COLOR];
+    multiColorShader.init();
+    multiColorShader.addShader(shaderDirectory + "MultiColorShader.vert", GL_VERTEX_SHADER);
+    multiColorShader.addShader(shaderDirectory + "MultiColorShader.frag", GL_FRAGMENT_SHADER);
+    multiColorShader.link();
 }
 
 GLuint ShaderManager::getPrgID(ShaderType type) { return shaderMap[type].ID; };

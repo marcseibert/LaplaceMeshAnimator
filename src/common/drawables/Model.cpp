@@ -15,7 +15,7 @@ void Model::Draw(Camera &camera)
 void Model::loadModel(std::string const &path)
 {
     Assimp::Importer importer;
-    const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
+    const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcessPreset_TargetRealtime_MaxQuality);
 
     if(!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) // if is Not Zero
     {
@@ -66,10 +66,15 @@ Mesh Model::processMesh(aiMesh *mesh, const aiScene *scene)
         vector.z = mesh->mVertices[i].z;
         vertex.Position = vector;
 
-        vector.x = mesh->mNormals[i].x;
-        vector.y = mesh->mNormals[i].y;
-        vector.z = mesh->mNormals[i].z;
-        vertex.Normal = vector;
+        if(mesh->mNormals) {
+            vector.x = mesh->mNormals[i].x;
+            vector.y = mesh->mNormals[i].y;
+            vector.z = mesh->mNormals[i].z;
+
+            vertex.Normal = vector;
+        } else {
+            vertex.Normal = glm::vec3(0,0,0);
+        }
 
         if(mesh->mTextureCoords[0])
         {

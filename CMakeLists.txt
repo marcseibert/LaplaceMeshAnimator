@@ -53,7 +53,12 @@ add_executable(${PROJECT_NAME}
         src/common/collision/Raycaster.h
         src/common/input/MouseHook.h
         src/common/collision/IntersectionRect.h
-        src/common/collision/IntersectionMesh.h src/common/modifier/EditableModel.h src/common/RenderIDObject.h)
+        src/common/collision/IntersectionMesh.h
+        src/common/modifier/EditableModel.h
+        src/common/RenderIDObject.h
+        src/common/modifier/VertexGrabModifier.h
+        src/common/modifier/LaplaceMeshModifier.h
+        src/common/modifier/MeshMatrix.h)
 
 target_include_directories(${PROJECT_NAME} PRIVATE include
         /usr/local/include

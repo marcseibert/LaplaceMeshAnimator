@@ -13,11 +13,12 @@
 class Renderer {
 public:
     Renderer() {};
-    Renderer(GLFWwindow* window) : window(window) {};
+    Renderer(GLFWwindow* window, Rect viewport) : window(window), mViewport(viewport) {};
 
-    void Draw(Rect viewport, Camera &camera, RenderObject &object) {
-        
-        camera.SetViewport(viewport.position.x, viewport.position.y, viewport.width, viewport.height);
+    void Draw(Camera &camera, RenderObject &object) {
+
+        ActivateViewport();
+        camera.SetViewport(mViewport.position.x, mViewport.position.y, mViewport.width, mViewport.height);
         object.Draw(camera);
     };
 
@@ -32,12 +33,24 @@ public:
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     };
 
-    void DrawIdObject(Rect viewport, Camera &camera, RenderIDObject &object) {
-        camera.SetViewport(viewport.position.x, viewport.position.y, viewport.width, viewport.height);
+    void DrawIdObject(Camera &camera, RenderIDObject &object) {
+        ActivateViewport();
+
+        camera.SetViewport(mViewport.position.x, mViewport.position.y, mViewport.width, mViewport.height);
         object.DrawID(camera);
     };
 
+    void ActivateViewport() {
+        glScissor(mViewport.position.x, mViewport.position.y, mViewport.width, mViewport.height);
+        glViewport(mViewport.position.x, mViewport.position.y, mViewport.width, mViewport.height);
+    }
+
+    void SetViewport(Rect viewport) {
+        mViewport = viewport;
+    }
+
 private:
     GLFWwindow *window;
+    Rect mViewport;
 };
 #endif //LAPLACEMESHANIMATOR_RENDERER_H

@@ -3,9 +3,31 @@
 #include <iostream>
 
 EditableMesh::EditableMesh(Mesh &mesh, unsigned int id)
-: drawMode(MESH_NORMAL_MODE), RenderIDObject(id), mSelected(false), mActive(false), mColor(NORMAL_MESH_COLOR) {
+: drawMode(MESH_NORMAL_MODE), RenderIDObject(id), mSelected(false), mActive(false), mColor(NORMAL_MESH_COLOR), mHandleSize(10){
+
     mMesh = &mesh;
+
+    // GENERATE VERTEX ID COLORS
+    glGenBuffers(1, &mColorCodeBuffer);
+    glBindBuffer(GL_ARRAY_BUFFER, mColorCodeBuffer);
+    unsigned int count = mesh.mVertices.size();
+    for(unsigned int i =0; i < count; i++) {
+        mColorCodes.push_back(TranslateToNormalizedColorCode(i));
+    }
+
+    glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec4) * mColorCodes.size(), &mColorCodes[0], GL_STATIC_DRAW);
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(glm::vec4), (void*) 0);
+
     UpdateColor();
+
+    mHandleColors.resize(mMesh->mVertices.size());
+    glGenBuffers(1, &mHandleColorBuffer);
+    glBindBuffer(GL_ARRAY_BUFFER, mHandleColorBuffer);
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(glm::vec4), (void*) 0);
+
+    UpdateHandleColors();
 }
 
 void EditableMesh::Draw(Camera &camera) {
@@ -14,6 +36,64 @@ void EditableMesh::Draw(Camera &camera) {
 
     glUniform4fv(glGetUniformLocation(shader.ID, "color"), 1, glm::value_ptr(mColor));
     mMesh->DrawCall(camera, shader);
+
+}
+
+void EditableMesh::DrawWireframe(Camera &camera) {
+    auto&shader = *ShaderManager::getProgram(SM_SINGLE_COLOR);
+    shader.use();
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_BACK);
+
+    glEnable(GL_POINT_SMOOTH);
+    glUniform4fv(glGetUniformLocation(shader.ID, "color"), 1, glm::value_ptr(glm::vec4(0)));
+
+    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    mMesh->DrawCall(camera, shader);
+}
+
+void EditableMesh::DrawVertexHandles(Camera &camera) {
+    auto &shader = *ShaderManager::getProgram(SM_MULTI_COLOR);
+    shader.use();
+
+    glPointSize(mHandleSize);
+    glDisable(GL_POINT_SMOOTH);
+    auto mvp = camera.GetCameraMatrix() * mMesh->GetGlobalTransform(); // localTransform;//glm::scale(localTransform, glm::vec3(10,10,10));//globalTransform;
+    glUniformMatrix4fv(glGetUniformLocation(shader.ID, "mvpMatrix"), 1, GL_FALSE, glm::value_ptr(mvp));
+
+    glPolygonMode(GL_FRONT_AND_BACK, GL_POINT);
+    // ENABLE VERTEX ATTRIB
+    glBindVertexArray(mMesh->VAO);
+
+    glBindBuffer(GL_ARRAY_BUFFER, mHandleColorBuffer);
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(glm::vec4), (void*) 0);
+
+    glDrawElements(GL_TRIANGLES, mMesh->mFaces.size() * 3, GL_UNSIGNED_INT, 0);
+    glBindVertexArray(0);
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+}
+
+void EditableMesh::DrawVertexHandleIds(Camera &camera) {
+    auto &shader = *ShaderManager::getProgram(SM_MULTI_COLOR);
+    shader.use();
+
+    glPointSize(mHandleSize);
+    glDisable(GL_POINT_SMOOTH);
+    auto mvp = camera.GetCameraMatrix() * mMesh->GetGlobalTransform(); // localTransform;//glm::scale(localTransform, glm::vec3(10,10,10));//globalTransform;
+    glUniformMatrix4fv(glGetUniformLocation(shader.ID, "mvpMatrix"), 1, GL_FALSE, glm::value_ptr(mvp));
+
+    glPolygonMode(GL_FRONT_AND_BACK, GL_POINT);
+    // ENABLE VERTEX ATTRIB
+    glBindVertexArray(mMesh->VAO);
+
+    glBindBuffer(GL_ARRAY_BUFFER, mColorCodeBuffer);
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(glm::vec4), (void*) 0);
+
+    glDrawElements(GL_TRIANGLES, mMesh->mFaces.size() * 3, GL_UNSIGNED_INT, 0);
+    glBindVertexArray(0);
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 }
 
 void EditableMesh::DrawID(Camera &camera) {
@@ -29,10 +109,19 @@ void EditableMesh::DrawID(Camera &camera, unsigned int id) {
     mMesh->DrawCall(camera, shader);
 }
 
-void EditableMesh::ClearHighlights() {
-
+void EditableMesh::ClearSelections() {
+    mHighlightedVertices.resize(0);
+    UpdateHandleColors();
 }
 
-void EditableMesh::HighlightVertex(unsigned int vertexID) {
+// TODO: MAKE THIS MORE EFFICIENT...
+void EditableMesh::ToggleVertexSelection(unsigned int vertexID) {
+    if(ContainsID(vertexID, mHighlightedVertices)) {
+        mHighlightedVertices.remove(vertexID);
+    } else {
+        mHighlightedVertices.push_back(vertexID);
+    }
 
+    UpdateHandleColors();
 }
+

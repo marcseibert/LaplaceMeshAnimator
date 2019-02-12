@@ -41,7 +41,8 @@ public:
     };
 
     void Translate(float x, float y, float z) {
-        mTransform.position += glm::vec3(x, y, z);
+        //UpdateGlobalTransform();
+        mTransform.position += glm::vec3(x,y,z);//glm::vec3(invGlobalTransform * glm::vec4(x, y, z, 1));
 
         UpdateLocalTransform();
     };
@@ -70,9 +71,12 @@ public:
 
         if(!mParent) {
             globalTransform = localTransform;
+            invGlobalTransform = globalTransform;
         } else {
             globalTransform = mParent->globalTransform * localTransform;
+            invGlobalTransform = glm::inverse(mParent->globalTransform);
         }
+
 
         for(std::vector<SceneNode*>::iterator child = mChildren.begin(); child != mChildren.end(); child++)
         {
@@ -111,6 +115,7 @@ protected:
 
     glm::mat4 localTransform;
     glm::mat4 globalTransform;
+    glm::mat4 invGlobalTransform;
 
     std::vector<SceneNode*> mChildren;
     SceneNode *mParent;

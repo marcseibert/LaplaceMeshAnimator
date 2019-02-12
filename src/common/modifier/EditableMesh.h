@@ -44,8 +44,8 @@ public:
     void ClearSelections();
     //void HighlightVertex(unsigned int vertexID);
     
-    std::list<unsigned int> GetSelectedVertices() {
-        return mHighlightedVertices;
+    std::list<unsigned int>* GetSelectedVertices() {
+        return &mHighlightedVertices;
     }
 
     void SetActive(bool b) {

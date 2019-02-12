@@ -24,30 +24,30 @@ void Camera::SetViewport(float x, float y, float width, float height) {
     UpdateCameraMatrix();
 }
 void Camera::Update(GLFWwindow *window, float deltaTime) {
-    const float speed = 100.0f;
+    const float speed = 30.0f;
 
     if(glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS) {
-        Translate(speed * deltaTime,0,0);
-    }
-
-    if(glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS) {
         Translate(-speed * deltaTime,0,0);
     }
 
-    if(glfwGetKey(window, GLFW_KEY_PAGE_UP) == GLFW_PRESS) {
-        Translate(0,0,-speed * deltaTime);
+    if(glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS) {
+        Translate(speed * deltaTime,0,0);
     }
 
-    if(glfwGetKey(window, GLFW_KEY_PAGE_DOWN) == GLFW_PRESS) {
+    if(glfwGetKey(window, GLFW_KEY_PAGE_UP) == GLFW_PRESS) {
         Translate(0,0,speed * deltaTime);
     }
 
+    if(glfwGetKey(window, GLFW_KEY_PAGE_DOWN) == GLFW_PRESS) {
+        Translate(0,0, -speed * deltaTime);
+    }
+
     if(glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS) {
-        Translate(0,speed *deltaTime,0);
+        Translate(0, -speed *deltaTime,0);
     }
 
     if(glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) {
-        Translate(0,-speed * deltaTime, 0);
+        Translate(0, speed * deltaTime, 0);
     }
 }
 
@@ -60,7 +60,7 @@ mat4 Camera::GetCameraMatrix() {
 void Camera::UpdateCameraMatrix() {
     UpdateLocalTransform();
     UpdateGlobalTransform();
-    glm::vec4 globalPosition = globalTransform * glm::vec4(mTransform.position + mDragVector, 1);
+    glm::vec4 globalPosition = globalTransform * glm::vec4(mTransform.position, 1); // + glm::vec4(mDragVector, 0);
 
     /*
     if(mIsDragged) {
@@ -76,8 +76,9 @@ void Camera::SetupProjectionMatrix() {
     if(mOrthographic) {
         //mProjectionMatrix = ortho(-((float) mViewport.width/2.0f),((float) mViewport.width/2.0f), -((float) mViewport.height/2.0f),((float) mViewport.height/2.0f), 0.1f, 10000.0f);
         // USE NORMALISED WORLD COORDINATES
-        float ratio = (float) mViewport.height / mViewport.width;
-        mProjectionMatrix = ortho(-1.0f, 1.0f, -ratio, ratio, 0.1f, 1000.0f);
+        float ratio = ((float) mViewport.height / mViewport.width)*mTransform.scale.y;
+
+        mProjectionMatrix = ortho(-mTransform.scale.x, mTransform.scale.x, -ratio, ratio, 0.1f, 1000.0f);
     } else{
         mProjectionMatrix = perspective(radians(60.0f), (float)mViewport.width / mViewport.height, 0.1f, 10000.0f);
     }
@@ -85,9 +86,10 @@ void Camera::SetupProjectionMatrix() {
 
 void Camera::ApplyDrag() {
 
-
-    Translate(mDragVector.x / 2, mDragVector.y / 2, mDragVector.z); //TODO THIS STRANGE BUG NEEDS TO BE FIXED
+    //mTransform.position += glm::vec3(glm::inverse(globalTransform) * glm::vec4(mDragVector, 1));
+    //Translate(mDragVector.x / (mTransform.scale.x), mDragVector.y / (mTransform.scale.y), mDragVector.z); //TODO THIS STRANGE BUG NEEDS TO BE FIXED
     mDragVector = glm::vec3(0);
+    mDeltaDrag = glm::vec3(0);
 
     mIsDragged = false;
 
@@ -99,7 +101,7 @@ glm::vec3 Camera::ScreenToWorldSpace(glm::vec3 coords) {
     float aspectRatio = mViewport.height / mViewport.width;
 
     // SCREENS SPACE - 0,0 IN TOP LEFT CORNER
-    return glm::vec3((coords.x / mViewport.width)*2, (coords.y/ mViewport.height) * 2 * aspectRatio, coords.z);
+    return glm::vec3((coords.x / mViewport.width)*2 *mTransform.scale.x, (coords.y/ mViewport.height) * 2 * aspectRatio * mTransform.scale.y, coords.z);
 }
 
 glm::vec3 Camera::ScreenPointToRay(glm::vec2 point) {
@@ -118,3 +120,11 @@ glm::vec3 Camera::ScreenPointToRay(glm::vec2 point) {
     std::cout << glm::to_string(rayWorld) << std::endl;
     return rayWorld;
 };
+
+void Camera::Drag(glm::vec3 dragVector) {
+    mDeltaDrag = -mDragVector + dragVector;
+    mDragVector = dragVector;
+
+    Translate(mDeltaDrag.x / mTransform.scale.x, mDeltaDrag.y / mTransform.scale.y, mDeltaDrag.z / mTransform.scale.z);
+    mIsDragged = true;
+}

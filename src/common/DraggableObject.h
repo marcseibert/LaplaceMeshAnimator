@@ -11,13 +11,11 @@ public:
 
     virtual void ApplyDrag() = 0;
 
-    virtual void Drag(glm::vec3 dragVector)  {
-        mDragVector = dragVector;
-        mIsDragged = true;
-    };
+    virtual void Drag(glm::vec3 dragVector) = 0;
 
     bool IsDragged() { return mIsDragged; };
 protected:
     glm::vec3 mDragVector;
+    glm::vec3 mDeltaDrag;
     bool mIsDragged;
 };

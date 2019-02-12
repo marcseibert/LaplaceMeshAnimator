@@ -38,6 +38,11 @@ void Mesh::setupMesh() {
 
 void Mesh::Update(GLFWwindow *window, float deltaTime) {};
 
+void Mesh::UpdateModel() {
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBufferData(GL_ARRAY_BUFFER, mVertices.size() * sizeof(Vertex), &mVertices[0], GL_STATIC_DRAW);
+}
+
 void Mesh::Draw(Camera &camera) {
 
     auto *shader = ShaderManager::getProgram(SM_COMPLEX_MESH);

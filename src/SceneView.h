@@ -12,18 +12,20 @@
 #include "common/drawables/Box.h"
 #include "common/modifier/EditableModel.h"
 #include "common/Util.h"
+#include "common/modifier/VertexGrabModifier.h"
+#include "common/modifier/LaplaceMeshModifier.h"
 
 class SceneView : public View {
 public:
     SceneView() : View() { };
 
     SceneView(GLFWwindow *window, float viewX, float viewY, float viewWidth, float viewHeight, MouseInput* mouseInput)
-    : View(viewX, viewY, viewWidth, viewHeight, mouseInput), renderer(window) {
-
+    : View(viewX, viewY, viewWidth, viewHeight, mouseInput), renderer(window, Rect(viewX, viewY, viewWidth, viewHeight)), grabModifier() {
         SetClearColor(glm::vec4(1,1,1,1));
         Repaint();
         // DEFINE UI OBJECTS HERE
-        mainCamera = Camera(viewWidth, viewHeight,0,0, -10, false);
+        mainCamera = Camera(viewWidth, viewHeight,0,0, -10, true);
+        mainCamera.Scale(5, 5, 5);
         //testModel = new Model("/Users/marcseibert/Downloads/nanosuit/nanosuit.obj", 0, 0, 0);
         //testModel = new Model("/Users/marcseibert/Desktop/pyramid.obj", 0, 0, 0);
 
@@ -33,12 +35,14 @@ public:
         };*/
         float range = 2;
 
-        for(int i = 0; i < 15; i++) {
-            testModels.push_back(new Model("/Users/marcseibert/Downloads/nanosuit/nanosuit.obj", randNumber(-10, 10), randNumber(-10, 10), randNumber(-10, 10)));
+        for(int i = 0; i < 1; i++) {
+            //testModels.push_back(new Model("/Users/marcseibert/Downloads/nanosuit/nanosuit.obj", randNumber(-10, 10), randNumber(-10, 10), randNumber(-10, 10)));
+            //testModels.push_back(new Model("/Users/marcseibert/Desktop/pyramid.obj", randNumber(-10, 10), randNumber(-10, 10), randNumber(-10, 10)));
         }
+        testModels.push_back(new Model("/Users/marcseibert/Documents/Development/git/LaplaceMeshAnimator/models/stanford_dragon/dragon.obj", 0,0,0));
         /*
+
         for(int i = 0; i < 15; i++) {
-            testModels.push_back(new Model("/Users/marcseibert/Desktop/prim_cube.obj", randNumber(-10, 10), randNumber(-10, 10), randNumber(-10, 10)));
         }
         */
 
@@ -86,7 +90,7 @@ public:
 
                 SetViewport();
                 for(auto &wrapper : editWrappers) {
-                    renderer.DrawIdObject(mBounds, mainCamera, wrapper);
+                    renderer.DrawIdObject(mainCamera, wrapper);
                 }
 
                 unsigned char res[4];
@@ -98,10 +102,20 @@ public:
                 if(res[3] != 0) {
                     unsigned int clickedObject = uiTranslateColorCode(glm::vec4(res[0], res[1], res[2], res[3]));
                     std::cout << " CLICKED ID " << clickedObject << std::endl;
+
+                    // DIRECTLY SELECT A CORRESPONDING MESH INSIDE THE MODEL
                     editWrappers[clickedObject].SetSelected(true);
+                    editWrappers[clickedObject].SelectMesh(renderer, mainCamera, mousePosition);
+                    grabModifier.BindMesh(editWrappers[clickedObject].GetSelectedMesh());
                 }
 
             }
+        }
+
+        grabModifier.Update(window, mainCamera, *mouseInput);
+
+        for(auto &wrapper :editWrappers) {
+            wrapper.Update(renderer, mainCamera, *mouseInput, deltaTime);
         }
 
         //mainCamera.ScreenPointToRay(glm::vec2(mouseInput->GetPosition()));
@@ -127,7 +141,7 @@ public:
 
 
         for(auto &wrapper : editWrappers) {
-            renderer.Draw(mBounds, mainCamera, wrapper);
+            renderer.Draw(mainCamera, wrapper);
         }
 
         //renderer.Draw(mBounds, mainCamera, testBox);
@@ -139,6 +153,7 @@ public:
     void UpdateWindowParameters() override {
         //mainCamera.SetViewport(mBounds.position.x, mBounds.position.x, mBounds.width, mBounds.height);
         std::cout << " SOMETHING CHANGES " << std::endl;
+        renderer.SetViewport(mBounds);
 
     };
 
@@ -155,6 +170,9 @@ private:
     std::vector<EditableModel> editWrappers;
     Renderer renderer;
     Camera mainCamera;
+
+    // MODIFIER
+    VertexGrabModifier grabModifier;
 
     // DEBUG METHOD
     float randNumber(float min, float max) {

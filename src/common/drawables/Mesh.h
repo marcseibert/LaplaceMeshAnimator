@@ -28,6 +28,7 @@ public:
     void Draw(Camera &camera) override;
     void DrawCall(Camera &camera, Shader &shader);
 
+    void UpdateModel();
     std::vector<Vertex> *GetVertices();
     std::vector<glm::uvec3> *GetFaces();
 
@@ -44,20 +45,4 @@ private:
     void setupMesh();
 };
 
-class MeshMatrix {
-public:
-    MeshMatrix() = default;
-
-    MeshMatrix(Mesh &mesh) : adjacencyMatrix(mesh.GetVertices()->size(), mesh.GetVertices()->size()){
-
-        for(auto &triangle : *mesh.GetFaces()) {
-
-        };
-    };
-
-    Eigen::SparseMatrix<unsigned char> *GetAdjacencyMatrix();
-
-private:
-    Eigen::SparseMatrix<unsigned char> adjacencyMatrix;
-};
 #endif //LAPLACEMESHANIMATOR_MESH_H

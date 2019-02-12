@@ -76,3 +76,8 @@ glm::ivec4 TranslateToColorCode(unsigned int code) {
 
     return colorCode;
 }
+
+glm::vec4 TranslateToNormalizedColorCode(unsigned int code) {
+    auto color = TranslateToColorCode(code);
+    return glm::vec4(color.x / 255.0, color.y / 255.0, color.z / 255.0, color.w / 255.0);
+}
