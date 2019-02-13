@@ -85,7 +85,7 @@ public:
         return 0;
     };
 
-    void Update(Renderer &renderer, Camera &camera, MouseInput &mouse, float deltaTime) {
+    void Update(GLFWwindow *window, Renderer &renderer, Camera &camera, MouseInput &mouse, float deltaTime) {
         if(mouse.IsNewPressed(MOUSE_BUTTON_LEFT) && mSelected) {
             //selectedMesh->
             unsigned int clickedVertex = CheckVertexIntersection(renderer, camera, mouse.GetPosition());
@@ -95,6 +95,23 @@ public:
                 std::cout << " CLICKED ON VERTEX " << clickedVertex << std::endl;
                 selectedMesh->ToggleVertexSelection(clickedVertex);
             }
+        }
+        if(glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
+
+            if(!wasPressedA) {
+                if(selectedMesh) {
+                    if(selectedMesh->GetSelectedVertices()->size() > 0){
+                        selectedMesh->ClearSelections();
+                    } else {
+                        selectedMesh->SelectAll();
+                        std::cout << " SELECT ALL " << std::endl;
+                    }
+                }
+            }
+
+            wasPressedA = true;
+        } else {
+            wasPressedA = false;
         }
     };
 
@@ -125,6 +142,7 @@ public:
     }
 
 protected:
+    bool wasPressedA;
     Model *mModel;
     bool mSelected;
     bool isEditing;

@@ -29,8 +29,8 @@ void mouseCallback(GLFWwindow *window, double xPos, double yPos) {
 }
 
 // GLOBAL VARIABLES
-GLint windowWidth = 800;
-GLint windowHeight = 600;
+GLint windowWidth = 1200;
+GLint windowHeight = 900;
 
 int main(int argc, const char * argv[]) {
     if(!glfwInit()) {

@@ -11,7 +11,7 @@
 class VertexGrabModifier : public MeshModifier {
 public:
     VertexGrabModifier()
-    : MeshModifier(), mGrabActive(false), mDragVector(0), wasPressed(false){ };
+    : MeshModifier(), mGrabActive(false), mDragVector(0), wasPressedG(false){ };
 
     void Update(GLFWwindow* window, Camera &camera, MouseInput &mouse) {
         if(!mMesh) {
@@ -20,7 +20,7 @@ public:
 
         if(glfwGetKey(window, GLFW_KEY_G) == GLFW_PRESS) {
 
-            if(!wasPressed) {
+            if(!wasPressedG) {
                 mGrabActive = !mGrabActive;
                 if(mGrabActive) {
                     mGrabOrigin = glm::vec3(mouse.GetPosition(),0);
@@ -29,9 +29,9 @@ public:
                 }
             }
 
-            wasPressed = true;
+            wasPressedG = true;
         } else {
-            wasPressed = false;
+            wasPressedG = false;
         }
 
         if(!mGrabActive) {
@@ -63,7 +63,7 @@ public:
     };
 
 private:
-    bool wasPressed;
+    bool wasPressedG;
     bool mGrabActive;
 
     glm::vec3 mDragVector;

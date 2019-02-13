@@ -20,21 +20,20 @@ class Sprite : public SceneNode, public RenderObject {
 public:
     Sprite() : SceneNode(), RenderObject() {};
     
-    Sprite(string const &path) : Sprite(path, 0,0,0,1,1) {};
-    Sprite(string const &path, float x, float y, float z, float width, float height);
+    Sprite(string const &path) : Sprite(path, 0,0,0,1,1, Rect(0,0,1,1)) {};
+    Sprite(string const &path, float x, float y, float z, float width, float height, Rect viewport);
     
     void Draw(Camera &camera) override;
-    //void SetOffsetRect(float x, float y, float width, float height);
+    void Update(GLFWwindow *window, float deltaTime) override;
     ~Sprite() override;
     
 private:
     Rect mBounds;
     GLuint VAO, VBO, EBO, textureID;
     float offsetX, offsetY, offsetWidth, offsetHeight;
-    mat4 mSpriteMatrix;
+    mat4 mModelMatrix;
 
-    void LoadTextureFromFile(string const &path);
-    void UpdateModelMatrix();
+    void UpdateModelMatrix(Rect viewport);
 
 };
 #endif /* Sprite_hpp */

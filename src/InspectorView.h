@@ -9,6 +9,7 @@
 #include "common/drawables/Box.h"
 #include "common/Renderer.h"
 #include "common/input/MouseInput.h"
+#include "common/drawables/Sprite.h"
 
 class InspectorView : public View {
 public:
@@ -17,15 +18,18 @@ public:
     InspectorView(GLFWwindow *window, float viewX, float viewY, float viewWidth, float viewHeight, MouseInput* mouseInput)
     : View(viewX, viewY, viewWidth, viewHeight, mouseInput), renderer(window, Rect(viewX, viewY, viewWidth, viewHeight)) {
 
-        SetClearColor(glm::vec4(1,0,1,1));
+        SetClearColor(glm::vec4(1,1,1,1));
         Repaint();
 
 
         // DEFINE UI OBJECTS HERE
         mainCamera = Camera(viewWidth, viewHeight,0,0, -5, true);
-        testBox = Box(Rect(0, 0, 200.0f, 200.0f), glm::vec4(1,1,0,1));
+        mSprite = Sprite("../assets/persp.png", 0, 4.0f, 0, 200, 75, Rect(viewX, viewY, viewWidth, viewHeight));
+        mSprite.SetScale(0.8f,0.8f,0.8f);
+        mSprite.UpdateGlobalTransform();
+        //Box(Rect(0, 0, 200.0f, 200.0f), glm::vec4(1,1,0,1));
 
-        testBox.UpdateGlobalTransform();
+        //testBox.UpdateGlobalTransform();
     };
 
 
@@ -48,7 +52,7 @@ public:
         }
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        renderer.Draw(mainCamera, testBox);
+        renderer.Draw(mainCamera, mSprite);
     };
 
     void UpdateWindowParameters() override {
@@ -58,7 +62,7 @@ public:
 
 
 private:
-    Box testBox;
+    Sprite mSprite;
     Renderer renderer;
     Camera mainCamera;
 };

@@ -28,7 +28,7 @@ public:
     Rect GetViewport() {
         return mViewport;
     };
-
+    glm::vec3 GetViewDir();
     glm::vec3 ScreenToWorldSpace(glm::vec3 coords);
     glm::vec3 ScreenPointToRay(glm::vec2 point);
     void Drag(glm::vec3 dragVector) override;
@@ -36,6 +36,7 @@ public:
     //void (glm::vec3 coords);
 
 private:
+    bool wasPressedP = false;
     void UpdateCameraMatrix();
     void SetupProjectionMatrix();
 

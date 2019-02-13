@@ -32,12 +32,12 @@ public:
 
             tripletList.push_back(T(triangle.z, triangle.x, 1));
             tripletList.push_back(T(triangle.x, triangle.z, 1));
-
-            Valence[triangle.x] += 2;
-            Valence[triangle.y] += 2;
-            Valence[triangle.z] += 2;
         }
         AdjacencyMatrix.setFromTriplets(tripletList.begin(), tripletList.end());
+
+        for(int col = 0; col < AdjacencyMatrix.cols(); col++){
+            Valence[col] = AdjacencyMatrix.col(col).nonZeros();
+        }
     };
 
     std::vector<int> Valence;

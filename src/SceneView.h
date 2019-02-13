@@ -25,7 +25,7 @@ public:
         Repaint();
         // DEFINE UI OBJECTS HERE
         mainCamera = Camera(viewWidth, viewHeight,0,0, -10, true);
-        mainCamera.Scale(5, 5, 5);
+        mainCamera.Scale(10, 10, 1);
         //testModel = new Model("/Users/marcseibert/Downloads/nanosuit/nanosuit.obj", 0, 0, 0);
         //testModel = new Model("/Users/marcseibert/Desktop/pyramid.obj", 0, 0, 0);
 
@@ -34,12 +34,14 @@ public:
                 glm::vec3(-0.4f,)
         };*/
         float range = 2;
-
-        for(int i = 0; i < 1; i++) {
+        /*
+        for(int i = 0; i < 15; i++) {
             //testModels.push_back(new Model("/Users/marcseibert/Downloads/nanosuit/nanosuit.obj", randNumber(-10, 10), randNumber(-10, 10), randNumber(-10, 10)));
-            //testModels.push_back(new Model("/Users/marcseibert/Desktop/pyramid.obj", randNumber(-10, 10), randNumber(-10, 10), randNumber(-10, 10)));
-        }
-        testModels.push_back(new Model("/Users/marcseibert/Documents/Development/git/LaplaceMeshAnimator/models/stanford_dragon/dragon.obj", 0,0,0));
+            testModels.push_back(new Model("/Users/marcseibert/Desktop/prim_cube.obj", randNumber(-10, 10), randNumber(-10, 10), randNumber(-10, 10)));
+        } */
+
+        testModels.push_back(new Model("/Users/marcseibert/Documents/Development/git/LaplaceMeshAnimator/models/stanford_dragon/dragon.obj", 0, -5, 0));
+
         /*
 
         for(int i = 0; i < 15; i++) {
@@ -49,11 +51,6 @@ public:
         for(auto &model : testModels) {
             editWrappers.push_back(EditableModel(*model, editWrappers.size()));
         }
-        unsigned int test = 25345;
-        glm::vec4 colorCode = TranslateToColorCode(test);
-        unsigned int output = uiTranslateColorCode(colorCode);
-
-        std::cout << " TEST " << test << " = " << output << std::endl;
 
         //testModel->SetScale(0.2f, 0.2f, 0.2f);
         //testBox = Box(Rect(0, 0, 100.0f, 100.0f), glm::vec4(1,1,0,1));
@@ -107,15 +104,16 @@ public:
                     editWrappers[clickedObject].SetSelected(true);
                     editWrappers[clickedObject].SelectMesh(renderer, mainCamera, mousePosition);
                     grabModifier.BindMesh(editWrappers[clickedObject].GetSelectedMesh());
+                    laplaceMeshModifier.BindMesh(editWrappers[clickedObject].GetSelectedMesh());
                 }
 
             }
         }
 
         grabModifier.Update(window, mainCamera, *mouseInput);
-
+        laplaceMeshModifier.Update(window, *mouseInput, deltaTime);
         for(auto &wrapper :editWrappers) {
-            wrapper.Update(renderer, mainCamera, *mouseInput, deltaTime);
+            wrapper.Update(window, renderer, mainCamera, *mouseInput, deltaTime);
         }
 
         //mainCamera.ScreenPointToRay(glm::vec2(mouseInput->GetPosition()));
@@ -173,6 +171,7 @@ private:
 
     // MODIFIER
     VertexGrabModifier grabModifier;
+    LaplaceMeshModifier laplaceMeshModifier;
 
     // DEBUG METHOD
     float randNumber(float min, float max) {

@@ -35,6 +35,8 @@ void EditableMesh::Draw(Camera &camera) {
     shader.use();
 
     glUniform4fv(glGetUniformLocation(shader.ID, "color"), 1, glm::value_ptr(mColor));
+    glUniform3fv(glGetUniformLocation(shader.ID, "viewDir"), 1, glm::value_ptr(camera.GetViewDir()));
+    glUniform1f(glGetUniformLocation(shader.ID, "diffuseStrength"), 0.1f);
     mMesh->DrawCall(camera, shader);
 
 }
@@ -70,6 +72,11 @@ void EditableMesh::DrawVertexHandles(Camera &camera) {
     glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(glm::vec4), (void*) 0);
 
     glDrawElements(GL_TRIANGLES, mMesh->mFaces.size() * 3, GL_UNSIGNED_INT, 0);
+
+    glBindBuffer(GL_ARRAY_BUFFER, mMesh->VBO);
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, Normal));
+
     glBindVertexArray(0);
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 }
@@ -92,6 +99,11 @@ void EditableMesh::DrawVertexHandleIds(Camera &camera) {
     glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(glm::vec4), (void*) 0);
 
     glDrawElements(GL_TRIANGLES, mMesh->mFaces.size() * 3, GL_UNSIGNED_INT, 0);
+
+    glBindBuffer(GL_ARRAY_BUFFER, mMesh->VBO);
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, Normal));
+
     glBindVertexArray(0);
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 }
@@ -120,6 +132,15 @@ void EditableMesh::ToggleVertexSelection(unsigned int vertexID) {
         mHighlightedVertices.remove(vertexID);
     } else {
         mHighlightedVertices.push_back(vertexID);
+    }
+
+    UpdateHandleColors();
+}
+
+void EditableMesh::SelectAll() {
+    mHighlightedVertices.resize(0);
+    for(int i = 0; i < mMesh->mVertices.size(); i++) {
+        mHighlightedVertices.push_back(i);
     }
 
     UpdateHandleColors();

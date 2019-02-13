@@ -6,6 +6,7 @@
 #define LAPLACEMESHANIMATOR_LAPLACEMESHMODIFIER_H
 #include "MeshModifier.h"
 #include "MeshMatrix.h"
+#include "../input/MouseInput.h"
 #include "EditableModel.h"
 #include <Eigen/Sparse>
 #include <Eigen/SparseCholesky>
@@ -16,8 +17,8 @@
 using namespace Eigen;
 class LaplaceMeshModifier : public MeshModifier {
 public:
-    explicit LaplaceMeshModifier(EditableModel *model) : MeshModifier() {
-
+    explicit LaplaceMeshModifier() : MeshModifier() {
+        mSolver = new SimplicialLDLT<SparseMatrix<float>>();
     };
 
     void BindMesh(EditableMesh *mesh) override {
@@ -31,63 +32,75 @@ public:
         ComputeLaplaceCoords();
         ComputeTransformOperator();
 
-
         // PRE COMPUTE
     };
 
     void ComputeModifier() override {
-        auto &constraints = *mMesh->GetSelectedVertices();
-        SetConstraints(constraints);
-
         // CONSTRUCT RESULT VECTOR
         auto &vertices = mMesh->mMesh->mVertices;
-        int constraintCount = constraints.size();
+        int constraintCount = mConstraintPositions.size();
         int bSize = mVertexCount + constraintCount;
 
-        VectorXf b((bSize) * 3);
+        VectorXf b(bSize * 3);
+
         for(int i = 0; i < mVertexCount; i++) {
-            b(i)           = mLaplaceCoords(i, 0);
-            b(i +   bSize) = mLaplaceCoords(i, 1);
-            b(i + 2*bSize) = mLaplaceCoords(i, 2);
+            b(i)                  = mLaplaceCoords(i, 0);
+            b(i +   mVertexCount) = mLaplaceCoords(i, 1);
+            b(i + 2*mVertexCount) = mLaplaceCoords(i, 2);
         }
 
-        int constraintIterCount = mVertexCount;
-        for(std::list<unsigned int>::iterator it = constraints.begin(); it != constraints.end(); ++it) {
-            b(constraintIterCount          ) = vertices[*it].Position.x;
-            b(constraintIterCount +   bSize) = vertices[*it].Position.y;
-            b(constraintIterCount + 2*bSize) = vertices[*it].Position.z;
-            constraintIterCount++;
+        int constraintIterCount = 3 * mVertexCount;
+        for(std::vector<glm::vec3>::iterator it = mConstraintPositions.begin(); it != mConstraintPositions.end(); ++it) {
+            b(constraintIterCount++) = it->x; // vertices[*it].Position.x;
+            b(constraintIterCount++) = it->y; // vertices[*it].Position.y;
+            b(constraintIterCount++) = it->z; // vertices[*it].Position.z;
         }
 
+        //std::cout << "aT " << mTransposeMatrixA.rows() << "x" << mTransposeMatrixA.cols() << std::endl;
         VectorXf x;
-        x = mSolver.solve(mTransposeMatrixA * b);
+        x = mSolver->solve(mTransposeMatrixA * b);
+
+        if(mSolver->info()!= Eigen::Success) {
+            // solving failed
+            return;
+        }
+        //std::cout << x << std::endl;
+
+        for(int i = 0; i < mVertexCount; i++) {
+            vertices[i].Position = glm::vec3(x(i), x(mVertexCount + i), x(2*mVertexCount + i));
+        }
+
+        mMesh->mMesh->UpdateModel();
     };
 
-    void SetConstraints(std::list<unsigned int> &constraints) {
+    void SetConstraints(std::vector<unsigned int> &constraints) {
         typedef Triplet<float> T;
 
         int constraintCount = constraints.size();
         int bSize = mVertexCount + constraintCount;
+        mConstIds = constraints;
 
         // CONSTRUCT OPERATOR
-        Eigen::SparseMatrix<float> matrixA(mVertexCount, (mVertexCount + constraintCount) * 3);
+        Eigen::SparseMatrix<float> matrixA((mVertexCount + constraintCount)*3, mVertexCount * 3);
         std::vector<T> inserts;
         inserts.reserve(9*(mVertexCount + constraintCount));
 
         // INSERT LAPLACE OPERATOR
-        for(int row = 0; row < mVertexCount; row++) {
-            for(SparseMatrix<float>::InnerIterator it(mLaplaceOperator, row); it; ++it) {
-                inserts.push_back(T(row,                  it.row(), it.value()));
-                inserts.push_back(T(row,   mVertexCount + it.row(), it.value()));
-                inserts.push_back(T(row, 2*mVertexCount + it.row(), it.value()));
+        for(int col = 0; col < mVertexCount; col++) {
+
+            // ITERATRE OVER COLUMNS
+            for(SparseMatrix<float>::InnerIterator it(mLaplaceOperator, col); it; ++it) {
+                inserts.push_back(T(                 it.row(),                  col, it.value()));
+                inserts.push_back(T(  mVertexCount + it.row(),   mVertexCount + col, it.value()));
+                inserts.push_back(T(2*mVertexCount + it.row(), 2*mVertexCount + col, it.value()));
             }
         }
 
         // INSERT CONSTRAINT IDENTITY
         for(int i = 0; i < constraintCount; i++) {
-            inserts.push_back(T(             mVertexCount + i    , mVertexCount + i    , 1));
-            inserts.push_back(T(bSize      + mVertexCount + i + 1, mVertexCount + i + 1, 1));
-            inserts.push_back(T(bSize * 2  + mVertexCount + i + 2, mVertexCount + i + 2, 1));
+            inserts.push_back(T(3* (mVertexCount + i)    ,                  constraints[i], 1));
+            inserts.push_back(T(3* (mVertexCount + i) + 1, mVertexCount   + constraints[i], 1));
+            inserts.push_back(T(3* (mVertexCount + i) + 2, mVertexCount*2 + constraints[i], 1));
         }
 
         matrixA.setFromTriplets(inserts.begin(), inserts.end());
@@ -97,19 +110,85 @@ public:
         // INSERT CONDITION VECTOR THREE TIMES
 
         mTransposeMatrixA = matrixA.transpose();
+        SimplicialLDLT<SparseMatrix<float>> &solver = *mSolver;
+        solver.compute(mTransposeMatrixA * matrixA);
+
+        if(solver.info()!= Eigen::Success) {
+            std::cout << " FAILED TO COMPUTE " << std::endl;
+        }
 
         // SOLVE USING NORMAL EQUATION
-        mSolver.compute(mTransposeMatrixA * matrixA);
+        //mSolver->compute(mTransposeMatrixA * matrixA);
     };
+
+    void SetConstraintPositions(std::vector<glm::vec3> &constraintPositions) {
+        mConstraintPositions = constraintPositions;
+    }
+
+    void Update(GLFWwindow *window, MouseInput &mouse, float deltaTime) {
+        if(glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) {
+            if(!wasPressedSpace) {
+                // COMPUTE
+                std::list<unsigned int> constraintIds = *mMesh->GetSelectedVertices();
+                std::vector<unsigned int> constVec;
+                constVec.reserve(constraintIds.size());
+
+                for(std::list<unsigned int>::iterator it = constraintIds.begin(); it != constraintIds.end(); it++) {
+                    constVec.push_back(*it);
+                }
+
+                SetConstraints(constVec);
+                std::cout << " CONSTRAINT IDS WHERE SET TO " << mConstIds.size() << std::endl;
+            }
+            wasPressedSpace = true;
+        } else {
+            wasPressedSpace = false;
+        }
+
+        if(glfwGetKey(window, GLFW_KEY_L) == GLFW_PRESS) {
+            if(!wasPressedL) {
+                if (!liveCompute) {
+                    // COMPUTE
+                    std::cout << " SET POSITIONS AND COMPUTE " << std::endl;
+                    std::vector<glm::vec3> constPositions;
+
+                    for (int i = 0; i < mConstIds.size(); i++) {
+                        constPositions.push_back(mMesh->mMesh->mVertices[mConstIds[i]].Position);
+                    }
+                    SetConstraintPositions(constPositions);
+                }
+                //ComputeModifier();
+                liveCompute = !liveCompute;
+                mMesh->ClearSelections();
+            }
+
+            wasPressedL = true;
+        } else {
+            wasPressedL = false;
+        }
+
+        if(liveCompute) {
+            ComputeModifier();
+        }
+    }
+
+    ~LaplaceMeshModifier() {
+        //delete mSolver;
+    }
 private:
+    bool liveCompute = false;
+    bool wasPressedSpace = false;
+    bool wasPressedL = false;
     int mVertexCount;
     MeshMatrix mMeshMatrix;
     Eigen::Matrix<float, Eigen::Dynamic, 3> mLaplaceCoords;
     Eigen::SparseMatrix<float> mTransposeMatrixA;
     Eigen::SparseMatrix<float> mLaplaceOperator;
 
+    std::vector<unsigned int> mConstIds;
+    std::vector<glm::vec3> mConstraintPositions;
 
-    SimplicialLDLT<SparseMatrix<float>> mSolver;
+    SimplicialLDLT<SparseMatrix<float>> *mSolver;
 
     // TAKE CARE THE RESULT IS A Nx3 MATRIX
     // WE ARE LATER USING A N*3 VECTOR
@@ -122,17 +201,19 @@ private:
         auto &adjMatrix = mMeshMatrix.AdjacencyMatrix;
         auto &valence = mMeshMatrix.Valence;
         mLaplaceOperator.resize(mVertexCount, mVertexCount);
-        for(int row = 0; row < mVertexCount; row++) {
+        for(int col = 0; col < mVertexCount; col++) {
             // USING THE LAPLACE DEFINITION FROM THE PAPER
-            tripletList.push_back(T(row, row, 1));
+            tripletList.push_back(T(col, col, 1));
 
-            for(SparseMatrix<unsigned char>::InnerIterator it(adjMatrix, row); it; ++it) {
-                if(row != it.row()) {
-                    tripletList.push_back(T(row, it.row(), -1.0f / valence[row]));
+            for(SparseMatrix<unsigned char>::InnerIterator it(adjMatrix, col); it; ++it) {
+                if(col != it.row()) {
+                    tripletList.push_back(T(it.row(), col, -1.0f / valence[it.row()]));
                 }
             }
         }
         mLaplaceOperator.setFromTriplets(tripletList.begin(), tripletList.end());
+
+       // std::cout << mLaplaceOperator << std::endl;
     }
 
     void ComputeLaplaceCoords() {
@@ -210,23 +291,6 @@ private:
             // ... DER OPERATOR MUESSTE NOCH ZWISCHEN GESPEICHERT WERDEN. PROBLEM: Der operator produziert hom Coords..
 
         }*/
-    }
-
-    void ComputeConstraints(SparseMatrix<float> &constraints) {
-        typedef Triplet<unsigned char> T;
-
-        auto &selected = *mMesh->GetSelectedVertices();
-
-        //constraints.reserve(selected.size() * 3,mVertexCount);
-        std::vector<T> insert(selected.size() * 3);
-
-        for(auto &vertexID : selected) {
-            insert.push_back(T(vertexID    , vertexID    , 1.0f));
-            insert.push_back(T(vertexID + 1, vertexID + 1, 1.0f));
-            insert.push_back(T(vertexID + 2, vertexID + 2, 1.0f));
-        }
-
-        constraints.setFromTriplets(insert.begin(), insert.end());
     }
 };
 #endif //LAPLACEMESHANIMATOR_LAPLACEMESHMODIFIER_H

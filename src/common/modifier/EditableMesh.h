@@ -42,8 +42,9 @@ public:
 
     void ToggleVertexSelection(unsigned int vertexID);
     void ClearSelections();
+    void SelectAll();
     //void HighlightVertex(unsigned int vertexID);
-    
+
     std::list<unsigned int>* GetSelectedVertices() {
         return &mHighlightedVertices;
     }

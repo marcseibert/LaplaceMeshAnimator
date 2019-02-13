@@ -24,6 +24,18 @@ void Camera::SetViewport(float x, float y, float width, float height) {
     UpdateCameraMatrix();
 }
 void Camera::Update(GLFWwindow *window, float deltaTime) {
+
+    if(glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS) {
+        if(!wasPressedP) {
+            mOrthographic = !mOrthographic;
+            SetupProjectionMatrix();
+            UpdateCameraMatrix();
+        }
+
+        wasPressedP = true;
+    } else {
+        wasPressedP = false;
+    }
     const float speed = 30.0f;
 
     if(glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS) {
@@ -127,4 +139,8 @@ void Camera::Drag(glm::vec3 dragVector) {
 
     Translate(mDeltaDrag.x / mTransform.scale.x, mDeltaDrag.y / mTransform.scale.y, mDeltaDrag.z / mTransform.scale.z);
     mIsDragged = true;
+}
+
+glm::vec3 Camera::GetViewDir() {
+    return glm::vec3(0,0,1);
 }

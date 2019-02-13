@@ -3,7 +3,7 @@
 #include "../Util.h"
 #include "../ShaderManager.h"
 
-Sprite::Sprite(string const &path, float x, float y, float z, float width, float height)
+Sprite::Sprite(string const &path, float x, float y, float z, float width, float height, Rect viewport)
 : SceneNode(), RenderObject() {
     
     Shader *program = ShaderManager::getProgram(SM_SPRITE);
@@ -15,17 +15,28 @@ Sprite::Sprite(string const &path, float x, float y, float z, float width, float
     offsetY = 0;
     offsetWidth = 1;
     offsetHeight = 1;
-    
+
+    mBounds.position.x = x;
+    mBounds.position.y = y;
     mBounds.width = width;
     mBounds.height = height;
     
     float newRectData[5 * 4] = {
-        -1, -1, 0, offsetX, offsetY,
-        -1,  1, 0, offsetX, offsetY + offsetHeight,
-         1,  1, 0, offsetX + offsetWidth, offsetY + offsetHeight,
-         1, -1, 0, offsetX + offsetWidth, offsetY
+        -1, -1, 0, offsetX + offsetWidth, offsetY,
+        -1,  1, 0, offsetX + offsetWidth, offsetY + offsetHeight,
+         1,  1, 0, offsetX, offsetY + offsetHeight,
+         1, -1, 0, offsetX, offsetY
     };
-    
+
+    /*
+    float newRectData[5 * 4] = {
+            -1, -1, 0, offsetX, offsetY,
+            -1,  1, 0, offsetX, offsetY + offsetHeight,
+            1,  1, 0, offsetX + offsetWidth, offsetY + offsetHeight,
+            1, -1, 0, offsetX + offsetWidth, offsetY
+    };
+     */
+
     // generate Rect
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
@@ -54,8 +65,15 @@ Sprite::Sprite(string const &path, float x, float y, float z, float width, float
     
     glBindVertexArray(0);
     
-    UpdateModelMatrix();
+    UpdateModelMatrix(viewport);
+
+    UpdateLocalTransform();
+    UpdateGlobalTransform();
 };
+
+void Sprite::Update(GLFWwindow *window, float deltaTime) {
+
+}
 
 Sprite::~Sprite() {
     
@@ -69,7 +87,7 @@ void Sprite::Draw(Camera &camera) {
     glUniform1i(glGetUniformLocation(program->ID, "tex"), 0);
     
     // CALCULATE MVP MATRIX
-    auto mvp = camera.GetCameraMatrix() * mSpriteMatrix;
+    auto mvp = camera.GetCameraMatrix() * globalTransform * mModelMatrix;
     
     glUniformMatrix4fv(glGetUniformLocation(program->ID, "mvpMatrix"), 1, GL_FALSE, value_ptr(mvp));
 
@@ -78,8 +96,10 @@ void Sprite::Draw(Camera &camera) {
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, (void*)0);
 };
 
-void Sprite::UpdateModelMatrix() {
-    mSpriteMatrix = translate(mat4(1), mTransform.position);
-    //mSpriteMatrix = rotate(mat4(1), mTransform.)
-    mSpriteMatrix = globalTransform * mSpriteMatrix;
+void Sprite::UpdateModelMatrix(Rect viewport) {
+    float bRatio = mBounds.height / mBounds.width;
+    float relativeWidth = mBounds.width / viewport.width;
+
+    mModelMatrix = translate(mat4(1), glm::vec3(mBounds.position.x, mBounds.position.y, 0));
+    mModelMatrix = scale(mModelMatrix, vec3(relativeWidth, relativeWidth * bRatio, 1));
 }
