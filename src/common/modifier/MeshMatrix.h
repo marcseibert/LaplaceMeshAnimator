@@ -6,7 +6,8 @@
 #define LAPLACEMESHANIMATOR_MESHMATRIX_H
 #include <Eigen/Sparse>
 #include "../drawables/Mesh.h"
-
+#include <set>
+#include <list>
 
 
 using namespace Eigen;
@@ -38,7 +39,47 @@ public:
         for(int col = 0; col < AdjacencyMatrix.cols(); col++){
             Valence[col] = AdjacencyMatrix.col(col).nonZeros();
         }
+
+        ComputeShortestPaths();
     };
+
+    void ComputeShortestPaths() {
+        /*
+        typedef Eigen::Triplet<unsigned int> T;
+
+        int vertexCount = AdjacencyMatrix.rows();
+
+        std::vector<T> inserts;
+        inserts.reserve(vertexCount * 3);
+
+        for(int middle = 0; middle < vertexCount; middle++) {
+            for (int start = 0; start < vertexCount; ++start) {
+                for(Eigen::SparseMatrix<unsigned char> )
+                //for (int end = 0; end < vertexCount; ++end) {
+
+                //}
+            }
+        } */
+    }
+
+    std::list<unsigned int> GetVerticesInRange(unsigned int vertex, int range) {
+        std::set<unsigned int> reachableVertices;
+        std::set<unsigned int> newVertices;
+
+        reachableVertices.insert(vertex);
+        for(int i = 0; i < range; i++) {
+            newVertices.clear();
+            for(auto &vert : reachableVertices) {
+                for(SparseMatrix<unsigned char>::InnerIterator it(AdjacencyMatrix, vert); it; ++it) {
+                    newVertices.insert(it.row());
+                }
+            }
+
+            reachableVertices.insert(newVertices.begin(), newVertices.end());
+        }
+
+        return std::list<unsigned int>(reachableVertices.begin(), reachableVertices.end());
+    }
 
     std::vector<int> Valence;
     SparseMatrix<unsigned char> AdjacencyMatrix;

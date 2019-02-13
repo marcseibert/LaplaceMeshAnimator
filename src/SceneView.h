@@ -4,7 +4,6 @@
 
 #ifndef LAPLACEMESHANIMATOR_SCENEVIEW_H
 #define LAPLACEMESHANIMATOR_SCENEVIEW_H
-
 #include "common/View.h"
 #include "common/Renderer.h"
 #include "common/input/MouseInput.h"
@@ -110,8 +109,8 @@ public:
             }
         }
 
-        grabModifier.Update(window, mainCamera, *mouseInput);
-        laplaceMeshModifier.Update(window, *mouseInput, deltaTime);
+        grabModifier.Update(window, renderer, mainCamera, *mouseInput);
+        laplaceMeshModifier.Update(window, renderer,mainCamera, *mouseInput, deltaTime);
         for(auto &wrapper :editWrappers) {
             wrapper.Update(window, renderer, mainCamera, *mouseInput, deltaTime);
         }
@@ -120,6 +119,18 @@ public:
 
         mainCamera.Update(window, deltaTime);
     };
+
+    void SetEditMode(int mode) {
+        mEditMode = mode;
+
+        if(mEditMode == 0) {
+            laplaceMeshModifier.Disable();
+            grabModifier.Enable();
+        } else {
+            laplaceMeshModifier.Enable();
+            grabModifier.Disable();
+        }
+    }
 
     void Draw() override {
         SetViewport();
@@ -163,6 +174,7 @@ public:
     };
 
 private:
+    int mEditMode;
     //Box testBox;
     std::vector<Model*> testModels;
     std::vector<EditableModel> editWrappers;

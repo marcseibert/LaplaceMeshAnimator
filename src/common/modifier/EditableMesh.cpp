@@ -121,19 +121,40 @@ void EditableMesh::DrawID(Camera &camera, unsigned int id) {
     mMesh->DrawCall(camera, shader);
 }
 
-void EditableMesh::ClearSelections() {
+void EditableMesh::ClearSelection() {
     mHighlightedVertices.resize(0);
+
+    ClearHandleColors();
     UpdateHandleColors();
 }
 
 // TODO: MAKE THIS MORE EFFICIENT...
 void EditableMesh::ToggleVertexSelection(unsigned int vertexID) {
-    if(ContainsID(vertexID, mHighlightedVertices)) {
+
+    SetVertexSelection(vertexID, ContainsID(vertexID, mHighlightedVertices));
+}
+
+void EditableMesh::SetVertexSelection(unsigned int vertexID, bool b, glm::vec4 selectionColor) {
+    if(!b) {
         mHighlightedVertices.remove(vertexID);
     } else {
-        mHighlightedVertices.push_back(vertexID);
+        if(!ContainsID(vertexID, mHighlightedVertices)) {
+            mHighlightedVertices.push_back(vertexID);
+        }
     }
 
+    mHandleColors[vertexID] = selectionColor;
+    UpdateHandleColors();
+}
+
+void EditableMesh::SetVertexSelection(unsigned int vertexID, bool b) {
+    SetVertexSelection(vertexID, b, b ? SELECTED_VERTEX_COLOR : UNSELECTED_VERTEX_COLOR);
+}
+
+void EditableMesh::SetSelectionSet(std::list<unsigned int> &selection, glm::vec4 selectionColor) {
+    mHighlightedVertices = selection;
+
+    SetSelectionSetColor(selectionColor);
     UpdateHandleColors();
 }
 
@@ -142,7 +163,37 @@ void EditableMesh::SelectAll() {
     for(int i = 0; i < mMesh->mVertices.size(); i++) {
         mHighlightedVertices.push_back(i);
     }
-
+    SetSelectionSetColor(SELECTED_VERTEX_COLOR);
     UpdateHandleColors();
 }
 
+GLuint EditableMesh::CheckVertexIntersection(Renderer &renderer, Camera &camera, glm::vec2 position) {
+    renderer.ClearIds();
+    renderer.ActivateViewport();
+
+    DrawVertexHandleIds(camera);
+
+    unsigned char res[4];
+    GLint viewport[4];
+    glGetIntegerv(GL_VIEWPORT, viewport);
+    glReadPixels(position.x, viewport[3] - position.y, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, &res);
+
+    if(res[3] != 0) {
+        unsigned int clickedObject = uiTranslateColorCode(glm::vec4(res[0], res[1], res[2], res[3]));
+        //std::cout << " CLICKED ID " << clickedObject << std::endl;
+
+        return clickedObject + 1;
+    } else {
+        return 0;
+    }
+    return 0;
+};
+
+void EditableMesh::UnselectVertexSet(std::list<unsigned int> &vertexSet, glm::vec4 color) {
+    for(std::list<unsigned int>::iterator it = vertexSet.begin(); it != vertexSet.end(); it++) {
+        mHighlightedVertices.remove(*it);
+        mHandleColors[*it] = color;
+    }
+
+    UpdateHandleColors();
+}

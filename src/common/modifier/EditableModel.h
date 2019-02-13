@@ -63,45 +63,14 @@ public:
         }
     };
 
-    GLuint CheckVertexIntersection(Renderer &renderer, Camera &camera, glm::vec2 position) {
-        renderer.ClearIds();
-        renderer.ActivateViewport();
-
-        selectedMesh->DrawVertexHandleIds(camera);
-
-        unsigned char res[4];
-        GLint viewport[4];
-        glGetIntegerv(GL_VIEWPORT, viewport);
-        glReadPixels(position.x, viewport[3] - position.y, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, &res);
-
-        if(res[3] != 0) {
-            unsigned int clickedObject = uiTranslateColorCode(glm::vec4(res[0], res[1], res[2], res[3]));
-            //std::cout << " CLICKED ID " << clickedObject << std::endl;
-
-            return clickedObject + 1;
-        } else {
-            return 0;
-        }
-        return 0;
-    };
 
     void Update(GLFWwindow *window, Renderer &renderer, Camera &camera, MouseInput &mouse, float deltaTime) {
-        if(mouse.IsNewPressed(MOUSE_BUTTON_LEFT) && mSelected) {
-            //selectedMesh->
-            unsigned int clickedVertex = CheckVertexIntersection(renderer, camera, mouse.GetPosition());
-
-            if(clickedVertex != 0) {
-                clickedVertex--;
-                std::cout << " CLICKED ON VERTEX " << clickedVertex << std::endl;
-                selectedMesh->ToggleVertexSelection(clickedVertex);
-            }
-        }
         if(glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
 
             if(!wasPressedA) {
                 if(selectedMesh) {
                     if(selectedMesh->GetSelectedVertices()->size() > 0){
-                        selectedMesh->ClearSelections();
+                        selectedMesh->ClearSelection();
                     } else {
                         selectedMesh->SelectAll();
                         std::cout << " SELECT ALL " << std::endl;
@@ -123,6 +92,10 @@ public:
         }
     }
 
+    EditableMesh* GetSelectedMesh() {
+        return selectedMesh;
+    }
+
     void SelectMesh(Renderer &renderer, Camera &camera, glm::vec2 mousePosition) {
         unsigned int selectedMeshID = CheckMeshIntersection(renderer, camera, mousePosition);
         if(selectedMeshID != 0) {
@@ -136,10 +109,6 @@ public:
             selectedMesh->SetSelected(true);
         }
     };
-
-    EditableMesh* GetSelectedMesh() {
-        return selectedMesh;
-    }
 
 protected:
     bool wasPressedA;

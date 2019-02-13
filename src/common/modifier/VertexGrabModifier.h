@@ -13,9 +13,19 @@ public:
     VertexGrabModifier()
     : MeshModifier(), mGrabActive(false), mDragVector(0), wasPressedG(false){ };
 
-    void Update(GLFWwindow* window, Camera &camera, MouseInput &mouse) {
-        if(!mMesh) {
+    void Update(GLFWwindow* window, Renderer &renderer, Camera &camera, MouseInput &mouse) {
+        if(!mMesh || !mEnabled) {
             return;
+        }
+
+        if(mouse.IsNewPressed(MOUSE_BUTTON_LEFT) && mMesh->IsSelected()) {
+            unsigned int clickedVertex = mMesh->CheckVertexIntersection(renderer, camera, mouse.GetPosition());
+
+            if(clickedVertex != 0) {
+                clickedVertex--;
+                std::cout << " CLICKED ON VERTEX " << clickedVertex << std::endl;
+                mMesh->ToggleVertexSelection(clickedVertex);
+            }
         }
 
         if(glfwGetKey(window, GLFW_KEY_G) == GLFW_PRESS) {
@@ -60,6 +70,20 @@ public:
 
     void BindMesh(EditableMesh *mesh) override {
         mMesh = mesh;
+    };
+
+    void Enable() override {
+        mEnabled = true;
+
+        mGrabActive = false;
+        mDragVector = glm::vec3(0);
+    };
+
+    void Disable() override {
+        mEnabled = false;
+
+        mGrabActive = false;
+        mDragVector = glm::vec3(0);
     };
 
 private:

@@ -11,6 +11,7 @@
 #include "../drawables/Mesh.h"
 #include "../RenderIDObject.h"
 #include "../Util.h"
+#include "../Renderer.h"
 
 using namespace std;
 
@@ -41,8 +42,9 @@ public:
     void DrawID(Camera &camera, unsigned int id);
 
     void ToggleVertexSelection(unsigned int vertexID);
-    void ClearSelections();
+    void ClearSelection();
     void SelectAll();
+    void UnselectVertexSet(std::list<unsigned int> &vertexSet, glm::vec4 color);
     //void HighlightVertex(unsigned int vertexID);
 
     std::list<unsigned int>* GetSelectedVertices() {
@@ -54,7 +56,7 @@ public:
         mSelected = mSelected && mActive;
 
         if(!mActive) {
-            ClearSelections();
+            ClearSelection();
         }
 
         UpdateColor();
@@ -66,13 +68,23 @@ public:
     }
 
 
+    bool IsSelected() {
+        return mSelected;
+    }
+
+    GLuint CheckVertexIntersection(Renderer &renderer, Camera &camera, glm::vec2 position);
+    void SetVertexSelection(unsigned int vertexID, bool b);
+    void SetVertexSelection(unsigned int vertexID, bool b, glm::vec4 selectionColor);
+
+    void SetSelectionSet(std::list<unsigned int> &selection, glm::vec4 selectionColor);
+
     Mesh *mMesh;
 private:
+    bool mSelected;
     float mHandleSize;
     glm::vec4 mColor;
     DrawMode drawMode;
     bool mActive;
-    bool mSelected;
     std::vector<glm::vec4> mColorCodes;
     std::vector<glm::vec4> mHandleColors;
     GLuint mColorCodeBuffer, mHandleColorBuffer;
@@ -91,15 +103,19 @@ private:
         }
     };
 
-    void UpdateHandleColors() {
+    void SetSelectionSetColor(glm::vec4 color) {
+        for(auto &id : mHighlightedVertices) {
+            mHandleColors[id] = color;//SELECTED_VERTEX_COLOR;
+        }
+    }
+
+    void ClearHandleColors() {
         for(auto &color : mHandleColors) {
             color = UNSELECTED_VERTEX_COLOR;
         }
+    }
 
-        for(auto &id : mHighlightedVertices) {
-            mHandleColors[id] = SELECTED_VERTEX_COLOR;
-        }
-
+    void UpdateHandleColors() {
         glBindBuffer(GL_ARRAY_BUFFER, mHandleColorBuffer);
         glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec4) * mHandleColors.size(), &mHandleColors[0], GL_STATIC_DRAW);
 

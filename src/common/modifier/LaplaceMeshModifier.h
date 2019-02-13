@@ -125,7 +125,74 @@ public:
         mConstraintPositions = constraintPositions;
     }
 
-    void Update(GLFWwindow *window, MouseInput &mouse, float deltaTime) {
+    void Update(GLFWwindow *window, Renderer &renderer, Camera &camera, MouseInput &mouse, float deltaTime) {
+        if(!mMesh || !mEnabled) {
+            return;
+        }
+
+        if(mouse.IsNewPressed(MOUSE_BUTTON_LEFT) && mMesh->IsSelected() &&!isDragging) {
+            unsigned int clickedVertex = mMesh->CheckVertexIntersection(renderer, camera, mouse.GetPosition());
+
+            if(clickedVertex != 0) {
+                clickedVertex--;
+                std::cout << "LAPLACE: CLICKED ON VERTEX " << clickedVertex << std::endl;
+                //mMesh->ToggleVertexSelection(clickedVertex);
+                mMesh->ClearSelection();
+                glm::vec4 blueColor(0,0,1,1);
+                auto neighborhood = mMeshMatrix.GetVerticesInRange(clickedVertex, 10);
+                std::cout << " SELECTING " << neighborhood.size() << " vertices" << std::endl;
+                mMesh->SelectAll();
+
+                mMesh->UnselectVertexSet(neighborhood, blueColor);
+                //mMesh->SetSelectionSet(neighborhood, blueColor);
+                mMesh->SetVertexSelection(clickedVertex, true, glm::vec4(1,1,0,1));
+
+                mDragOrigin = glm::vec3(mouse.GetPosition(), 0);
+                selectedVertex = clickedVertex;
+/*
+                // SET CONSTRAINT IDS
+                std::list<unsigned int> constraintIds = *mMesh->GetSelectedVertices();
+                std::vector<unsigned int> constVec;
+                constVec.reserve(constraintIds.size());
+
+                for(std::list<unsigned int>::iterator it = constraintIds.begin(); it != constraintIds.end(); it++) {
+                    constVec.push_back(*it);
+                }
+
+                // SET FIXED POSITION SET
+                std::vector<glm::vec3> constPositions;
+
+                for (int i = 0; i < mConstIds.size(); i++) {
+                    constPositions.push_back(mMesh->mMesh->mVertices[mConstIds[i]].Position);
+                }
+                SetConstraintPositions(constPositions);
+                */
+                isDragging = true;
+            }
+        }
+
+        if(!mouse.IsPressed(MOUSE_BUTTON_LEFT) && mMesh->IsSelected() && isDragging) {
+            isDragging = false;
+            std::cout << " RELEASE " << std::endl;
+        }
+
+        if(isDragging) {
+
+            glm::vec3 worldSpaceDrag = camera.ScreenToWorldSpace(mDragOrigin - glm::vec3(mouse.GetPosition(), 0));
+            std::cout << "drag-x: " << worldSpaceDrag.x << " drag-y: " << worldSpaceDrag.y << std::endl;
+
+            // REVERT PREVIOUS CHANGES
+            //mDeltaDrag = -mDragVector + worldSpaceDrag;
+            //mDragVector = worldSpaceDrag;
+
+            glm::mat4 inverse = glm::inverse(mMesh->mMesh->GetGlobalTransform());
+            glm::vec3 newPos = mMesh->mMesh->mVertices[selectedVertex].Position + glm::vec3(inverse * glm::vec4(mDeltaDrag,0));
+
+            // UPDATE POSTION
+            //SetConstraintPositions();
+            // RECALCULATE MESH
+        }
+
         if(glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) {
             if(!wasPressedSpace) {
                 // COMPUTE
@@ -159,7 +226,7 @@ public:
                 }
                 //ComputeModifier();
                 liveCompute = !liveCompute;
-                mMesh->ClearSelections();
+                mMesh->ClearSelection();
             }
 
             wasPressedL = true;
@@ -175,7 +242,23 @@ public:
     ~LaplaceMeshModifier() {
         //delete mSolver;
     }
+
+    void Enable() override {
+        mEnabled = true;
+    };
+
+    void Disable() override {
+        mEnabled = false;
+    };
+
 private:
+
+    // SELECTED HANDLE
+    unsigned int selectedVertex;
+    glm::vec3 mDragOrigin;
+    glm::vec3 mDeltaDrag;
+
+    bool isDragging = false;
     bool liveCompute = false;
     bool wasPressedSpace = false;
     bool wasPressedL = false;

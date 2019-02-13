@@ -13,9 +13,14 @@
 #include <algorithm>
 #include "common/input/MouseInput.h"
 
+enum EditMode {
+   VERTEX_GRAB_MODE,
+   LAPLACE_EDIT_MODE
+};
+
 class LaplaceAnimator : public GraphicsProgram {
 public:
-    LaplaceAnimator(GLFWwindow* window) : GraphicsProgram(window) { }
+    LaplaceAnimator(GLFWwindow* window) : GraphicsProgram(window), mEditMode(LAPLACE_EDIT_MODE) { }
 
     void Initialise(int screenWidth, int screenHeight) override {
 
@@ -25,6 +30,8 @@ public:
         scene = SceneView(window, 0, 0, sceneWidth, screenHeight, &mouse);
         inspector= InspectorView(window, sceneWidth, 0 , inspectorSize, screenHeight, &mouse);
 
+        // SET DEFAULT EDIT MODE
+        scene.SetEditMode(mEditMode);
         glClearColor(0,0,0,1);
     };
 
@@ -45,6 +52,21 @@ public:
             scene.SetActive(scene.InsideRect(glm::vec3(mousePosition, 0)));
 
             inspector.SetActive(inspector.InsideRect(glm::vec3(mousePosition, 0)));
+        }
+
+        if(glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS) {
+            if(!wasPressedE) {
+                if(mEditMode == LAPLACE_EDIT_MODE) {
+                    mEditMode = VERTEX_GRAB_MODE;
+                } else {
+                    mEditMode = LAPLACE_EDIT_MODE;
+                }
+                scene.SetEditMode(mEditMode);
+            }
+
+            wasPressedE = true;
+        } else {
+            wasPressedE = false;
         }
         scene.Update(window, deltaTime);
 
@@ -87,6 +109,8 @@ public:
     };
 
 private:
+    bool wasPressedE = false;
+    EditMode mEditMode;
     SceneView scene;
     InspectorView inspector;
     MouseInput mouse;
