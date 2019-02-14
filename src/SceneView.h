@@ -36,7 +36,8 @@ public:
             testModels.push_back(newModel);
 
         } */
-        testModels.push_back(new Model("/Users/marcseibert/Desktop/susanne.obj", 0, 0, 0));
+        testModels.push_back(new Model("../models/suzanne/suzanne.obj", 0, 0, 0));
+        //testModels.push_back(new Model("../models/stanford_dragon/dragon.obj", 0, 0, 0));
         testModels[0]->UpdateGlobalTransform();
 
         for(auto &model : testModels) {

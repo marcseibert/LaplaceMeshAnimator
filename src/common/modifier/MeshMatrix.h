@@ -39,8 +39,6 @@ public:
         for(int col = 0; col < AdjacencyMatrix.cols(); col++){
             Valence[col] = AdjacencyMatrix.col(col).nonZeros();
         }
-
-        ComputeShortestPaths();
     };
 
     std::list<unsigned int> GetVerticesInRange(unsigned int vertex, int range) {
