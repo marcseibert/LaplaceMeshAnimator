@@ -30,8 +30,15 @@ public:
         scene = SceneView(window, 0, 0, sceneWidth, screenHeight, &mouse);
         inspector= InspectorView(window, sceneWidth, 0 , inspectorSize, screenHeight, &mouse);
 
+        scene.SetActive(true);
+        inspector.SetActive(false);
+
+        perspectiveMode = false;
+        scene.SetPerspectiveMode(false);
+        inspector.SetPerspectiveMode(false);
         // SET DEFAULT EDIT MODE
         scene.SetEditMode(mEditMode);
+        scene.SetZoom(currentZoom, currentZoom, 1);
         glClearColor(0,0,0,1);
     };
 
@@ -68,6 +75,20 @@ public:
         } else {
             wasPressedE = false;
         }
+
+        if(glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS) {
+            if(!wasPressedP) {
+                perspectiveMode = !perspectiveMode;
+            }
+
+            wasPressedP = true;
+        } else {
+            wasPressedP = false;
+        }
+
+        scene.SetPerspectiveMode(perspectiveMode);
+        inspector.SetPerspectiveMode(perspectiveMode);
+
         scene.Update(window, deltaTime);
 
         inspector.Update(window, deltaTime);
@@ -104,11 +125,21 @@ public:
         //std::cout << xPos << " || " << yPos << std::endl;
     };
 
+    void OnMouseScroll(GLFWwindow *window, double xoffset, double yoffset) override{
+        std::cout << "SCROLL OFFSET " << yoffset << std::endl;
+        currentZoom += zoomSensitifity * yoffset;
+        scene.SetZoom(currentZoom, currentZoom, 1);
+    }
+
     ~LaplaceAnimator() override {
 
     };
 
 private:
+    bool wasPressedP = false;
+    bool perspectiveMode = false;
+    double zoomSensitifity = 0.05f;
+    float currentZoom = 3.0f;
     bool wasPressedE = false;
     EditMode mEditMode;
     SceneView scene;

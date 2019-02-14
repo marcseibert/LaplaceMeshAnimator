@@ -25,7 +25,7 @@ public:
     void ClearIds() {
         int width, height;
         glfwGetWindowSize(window, &width, &height);
-
+        std::cout << width << " " << height << std::endl;
         glViewport(0,0, width, height);
         glScissor(0,0, width, height);
 

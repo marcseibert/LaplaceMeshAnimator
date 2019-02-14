@@ -22,47 +22,33 @@ public:
     : View(viewX, viewY, viewWidth, viewHeight, mouseInput), renderer(window, Rect(viewX, viewY, viewWidth, viewHeight)), grabModifier() {
         SetClearColor(glm::vec4(1,1,1,1));
         Repaint();
+
         // DEFINE UI OBJECTS HERE
         mainCamera = Camera(viewWidth, viewHeight,0,0, -10, true);
-        mainCamera.Scale(10, 10, 1);
-        //testModel = new Model("/Users/marcseibert/Downloads/nanosuit/nanosuit.obj", 0, 0, 0);
-        //testModel = new Model("/Users/marcseibert/Desktop/pyramid.obj", 0, 0, 0);
 
-        /*
-        glm::vec3 positions[] = {
-                glm::vec3(-0.4f,)
-        };*/
         float range = 2;
-        /*
-        for(int i = 0; i < 15; i++) {
-            //testModels.push_back(new Model("/Users/marcseibert/Downloads/nanosuit/nanosuit.obj", randNumber(-10, 10), randNumber(-10, 10), randNumber(-10, 10)));
-            testModels.push_back(new Model("/Users/marcseibert/Desktop/prim_cube.obj", randNumber(-10, 10), randNumber(-10, 10), randNumber(-10, 10)));
+/*
+        for(int i = 0; i < 10; i++) {
+            //
+            Model *newModel = new Model("/Users/marcseibert/Desktop/susanne.obj", randNumber(-10, 10), randNumber(-10, 10), randNumber(-10, 10) + 20);
+            newModel->SetScale(randNumber(0.2f, 0.4f), randNumber(0.2f, 0.4f), randNumber(0.2f, 0.4f));
+            newModel->UpdateGlobalTransform();
+            testModels.push_back(newModel);
+
         } */
-
-        testModels.push_back(new Model("/Users/marcseibert/Documents/Development/git/LaplaceMeshAnimator/models/stanford_dragon/dragon.obj", 0, -5, 0));
-
-        /*
-
-        for(int i = 0; i < 15; i++) {
-        }
-        */
+        testModels.push_back(new Model("/Users/marcseibert/Desktop/susanne.obj", 0, 0, 0));
+        testModels[0]->UpdateGlobalTransform();
 
         for(auto &model : testModels) {
             editWrappers.push_back(EditableModel(*model, editWrappers.size()));
         }
-
-        //testModel->SetScale(0.2f, 0.2f, 0.2f);
-        //testBox = Box(Rect(0, 0, 100.0f, 100.0f), glm::vec4(1,1,0,1));
-
-        //testBox.UpdateGlobalTransform();
     };
 
+    void SetZoom(float x, float y, float z) {
+        mainCamera.SetScale(x, y, z);
+    }
 
     void Update(GLFWwindow *window, float deltaTime) override {
-        if(glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) {
-            testModels[0]->Translate(0.01f,0,0);
-        }
-
         if(!mActive) {
             return;
         }
@@ -70,9 +56,8 @@ public:
         if(mouseInput) {
             auto mousePosition = mouseInput->GetPosition();
             if(mouseInput->IsDragged()) {
-                //
                 glm::vec3 worldSpaceDrag = mainCamera.ScreenToWorldSpace(glm::vec3(mouseInput->GetDrag(), 0));
-                //std::cout << "drag-x: " << worldSpaceDrag.x << " drag-y: " << worldSpaceDrag.y << std::endl;
+
                 mainCamera.Drag(worldSpaceDrag);
                 mainCamera.UpdateGlobalTransform();
             }
@@ -115,8 +100,6 @@ public:
             wrapper.Update(window, renderer, mainCamera, *mouseInput, deltaTime);
         }
 
-        //mainCamera.ScreenPointToRay(glm::vec2(mouseInput->GetPosition()));
-
         mainCamera.Update(window, deltaTime);
     };
 
@@ -134,7 +117,6 @@ public:
 
     void Draw() override {
         SetViewport();
-
         if(mActive) {
 
             glClearColor(1.0, 1.0, 0.8, mClearColor.a);
@@ -142,36 +124,23 @@ public:
 
             glClearColor(mClearColor.r, mClearColor.g, mClearColor.b, mClearColor.a);
         }
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        /*
-        for(Model* model : testModels) {
-            renderer.Draw(mBounds, mainCamera, *model);
-        } */
 
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         for(auto &wrapper : editWrappers) {
             renderer.Draw(mainCamera, wrapper);
         }
-
-        //renderer.Draw(mBounds, mainCamera, testBox);
-        //renderer.Draw(mBounds, mainCamera, *testModel);
-
-
     };
+
+    void SetPerspectiveMode(bool b) {
+        mainCamera.SetPerspective(b);
+    }
 
     void UpdateWindowParameters() override {
-        //mainCamera.SetViewport(mBounds.position.x, mBounds.position.x, mBounds.width, mBounds.height);
-        std::cout << " SOMETHING CHANGES " << std::endl;
         renderer.SetViewport(mBounds);
-
     };
 
-    ~SceneView() override {
-        /*
-        for(int i = 0; i < 15; i++) {
-            delete testModels[i];
-        }*/
-    };
+    ~SceneView() override { };
 
 private:
     int mEditMode;

@@ -41,8 +41,7 @@ public:
     };
 
     void Translate(float x, float y, float z) {
-        //UpdateGlobalTransform();
-        mTransform.position += glm::vec3(x,y,z);//glm::vec3(invGlobalTransform * glm::vec4(x, y, z, 1));
+        mTransform.position += glm::vec3(x,y,z);
 
         UpdateLocalTransform();
     };
@@ -64,6 +63,7 @@ public:
 
     void Rotate(glm::vec3 axix, float angle) {
         // TODO: IMPLEMENT ROTATION
+
         UpdateLocalTransform();
     };
 

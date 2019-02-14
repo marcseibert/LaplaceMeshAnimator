@@ -28,12 +28,17 @@ public:
     Rect GetViewport() {
         return mViewport;
     };
+
+    void SetPerspective(bool b) {
+        mOrthographic = !b;
+        SetupProjectionMatrix();
+        UpdateCameraMatrix();
+    };
+
     glm::vec3 GetViewDir();
     glm::vec3 ScreenToWorldSpace(glm::vec3 coords);
     glm::vec3 ScreenPointToRay(glm::vec2 point);
     void Drag(glm::vec3 dragVector) override;
-
-    //void (glm::vec3 coords);
 
 private:
     bool wasPressedP = false;

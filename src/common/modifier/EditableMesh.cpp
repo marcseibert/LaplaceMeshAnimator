@@ -131,7 +131,7 @@ void EditableMesh::ClearSelection() {
 // TODO: MAKE THIS MORE EFFICIENT...
 void EditableMesh::ToggleVertexSelection(unsigned int vertexID) {
 
-    SetVertexSelection(vertexID, ContainsID(vertexID, mHighlightedVertices));
+    SetVertexSelection(vertexID, !ContainsID(vertexID, mHighlightedVertices));
 }
 
 void EditableMesh::SetVertexSelection(unsigned int vertexID, bool b, glm::vec4 selectionColor) {

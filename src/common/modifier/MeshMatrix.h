@@ -43,25 +43,6 @@ public:
         ComputeShortestPaths();
     };
 
-    void ComputeShortestPaths() {
-        /*
-        typedef Eigen::Triplet<unsigned int> T;
-
-        int vertexCount = AdjacencyMatrix.rows();
-
-        std::vector<T> inserts;
-        inserts.reserve(vertexCount * 3);
-
-        for(int middle = 0; middle < vertexCount; middle++) {
-            for (int start = 0; start < vertexCount; ++start) {
-                for(Eigen::SparseMatrix<unsigned char> )
-                //for (int end = 0; end < vertexCount; ++end) {
-
-                //}
-            }
-        } */
-    }
-
     std::list<unsigned int> GetVerticesInRange(unsigned int vertex, int range) {
         std::set<unsigned int> reachableVertices;
         std::set<unsigned int> newVertices;

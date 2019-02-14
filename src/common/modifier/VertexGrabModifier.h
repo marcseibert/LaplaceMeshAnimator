@@ -23,7 +23,7 @@ public:
 
             if(clickedVertex != 0) {
                 clickedVertex--;
-                std::cout << " CLICKED ON VERTEX " << clickedVertex << std::endl;
+                std::cout << "VERTEX GRAB: CLICKED ON VERTEX " << clickedVertex << std::endl;
                 mMesh->ToggleVertexSelection(clickedVertex);
             }
         }

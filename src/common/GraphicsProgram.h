@@ -18,7 +18,7 @@ public:
 
     virtual void OnMouseMove(GLFWwindow* window, double xPos, double yPos) = 0;
     virtual void OnWindowRescale(GLFWwindow* window, int screenWidth, int screenHeight) = 0;
-
+    virtual void OnMouseScroll(GLFWwindow *window, double xoffset, double yoffset) = 0;
     virtual ~GraphicsProgram() = default;
 protected:
     GLFWwindow *window;

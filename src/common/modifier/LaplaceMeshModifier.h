@@ -51,10 +51,20 @@ public:
 
         int constraintIterCount = 3 * mVertexCount;
         for(std::vector<glm::vec3>::iterator it = mConstraintPositions.begin(); it != mConstraintPositions.end(); ++it) {
-            b(constraintIterCount++) = it->x; // vertices[*it].Position.x;
-            b(constraintIterCount++) = it->y; // vertices[*it].Position.y;
-            b(constraintIterCount++) = it->z; // vertices[*it].Position.z;
+            //std::cout << "POSITION " << it->x << " " << it->y << " " << it->z << std::endl;
+            b(constraintIterCount++) = it->x *constraintWeight; // vertices[*it].Position.x;
+            b(constraintIterCount++) = it->y *constraintWeight; // vertices[*it].Position.y;
+            b(constraintIterCount++) = it->z *constraintWeight; // vertices[*it].Position.z;
+
         }
+        /*
+        for(int i = 0; i < mVertexCount; i++) {
+            //std::cout << "b: " << b(i) << " " << b(mVertexCount + i) << " " <<b(2*mVertexCount + i) << std::endl;
+        }
+        //std::cout << "---- CONSTRAINTS ------" << std::endl;
+        for(int i = 0; i < constraintCount; i++) {
+            std::cout << "b: " << b(mVertexCount*3 +i*3) << " " << b(mVertexCount*3 + i*3 +1) << " " <<b(mVertexCount*3 + i*3 +2) << std::endl;
+        } */
 
         //std::cout << "aT " << mTransposeMatrixA.rows() << "x" << mTransposeMatrixA.cols() << std::endl;
         VectorXf x;
@@ -68,6 +78,7 @@ public:
 
         for(int i = 0; i < mVertexCount; i++) {
             vertices[i].Position = glm::vec3(x(i), x(mVertexCount + i), x(2*mVertexCount + i));
+            //std::cout << "i: " << x(i) << " " << x(mVertexCount + i) << " " <<x(2*mVertexCount + i) << std::endl;
         }
 
         mMesh->mMesh->UpdateModel();
@@ -98,14 +109,24 @@ public:
 
         // INSERT CONSTRAINT IDENTITY
         for(int i = 0; i < constraintCount; i++) {
-            inserts.push_back(T(3* (mVertexCount + i)    ,                  constraints[i], 1));
-            inserts.push_back(T(3* (mVertexCount + i) + 1, mVertexCount   + constraints[i], 1));
-            inserts.push_back(T(3* (mVertexCount + i) + 2, mVertexCount*2 + constraints[i], 1));
+
+            inserts.push_back(T(3* (mVertexCount + i)    ,                  constraints[i], constraintWeight));
+            inserts.push_back(T(3* (mVertexCount + i) + 1, mVertexCount  + constraints[i], constraintWeight));
+            inserts.push_back(T(3* (mVertexCount + i) + 2, mVertexCount*2 + constraints[i], constraintWeight));
         }
 
+        //inserts.push_back(T(3* (mVertexCount + constraintCount - 1)    ,                  constraints[constraintCount - 1], 100* constraintWeight));
+        //inserts.push_back(T(3* (mVertexCount + constraintCount - 1) + 1, mVertexCount  + constraints[constraintCount - 1], 100 *constraintWeight));
+        //inserts.push_back(T(3* (mVertexCount + constraintCount - 1) + 2, mVertexCount*2 + constraints[constraintCount - 1], 100 *constraintWeight));
+
         matrixA.setFromTriplets(inserts.begin(), inserts.end());
-
-
+        //std::cout << matrixA << std::endl;
+        /*
+        std::cout << std::endl << " CONSTRAINTS" << std::endl;
+        for(int i = 0; i < constraints.size();i++) {
+            std::cout << i << " " << constraints[i] << std::endl;
+        } std::cout << std::endl;
+        */
         // INSERT LAPLACE OPERATOR THREE TIMES
         // INSERT CONDITION VECTOR THREE TIMES
 
@@ -137,19 +158,24 @@ public:
                 clickedVertex--;
                 std::cout << "LAPLACE: CLICKED ON VERTEX " << clickedVertex << std::endl;
                 //mMesh->ToggleVertexSelection(clickedVertex);
+                ComputeLaplaceCoords();
                 mMesh->ClearSelection();
                 glm::vec4 blueColor(0,0,1,1);
-                auto neighborhood = mMeshMatrix.GetVerticesInRange(clickedVertex, 10);
-                std::cout << " SELECTING " << neighborhood.size() << " vertices" << std::endl;
-                mMesh->SelectAll();
+                auto neighborhood = mMeshMatrix.GetVerticesInRange(clickedVertex, 5);
+                auto neighborhoodTwo = mMeshMatrix.GetVerticesInRange(clickedVertex, 3);
 
-                mMesh->UnselectVertexSet(neighborhood, blueColor);
-                //mMesh->SetSelectionSet(neighborhood, blueColor);
+                std::cout << " SELECTING " << neighborhood.size() << " vertices" << std::endl;
+                //mMesh->SelectAll();
+
+                //mMesh->UnselectVertexSet(neighborhood, blueColor);
+                mMesh->SetSelectionSet(neighborhood, blueColor);
+                mMesh->UnselectVertexSet(neighborhoodTwo, UNSELECTED_VERTEX_COLOR);
+
                 mMesh->SetVertexSelection(clickedVertex, true, glm::vec4(1,1,0,1));
 
                 mDragOrigin = glm::vec3(mouse.GetPosition(), 0);
                 selectedVertex = clickedVertex;
-/*
+
                 // SET CONSTRAINT IDS
                 std::list<unsigned int> constraintIds = *mMesh->GetSelectedVertices();
                 std::vector<unsigned int> constVec;
@@ -158,15 +184,20 @@ public:
                 for(std::list<unsigned int>::iterator it = constraintIds.begin(); it != constraintIds.end(); it++) {
                     constVec.push_back(*it);
                 }
+                SetConstraints(constVec);
 
                 // SET FIXED POSITION SET
                 std::vector<glm::vec3> constPositions;
 
                 for (int i = 0; i < mConstIds.size(); i++) {
                     constPositions.push_back(mMesh->mMesh->mVertices[mConstIds[i]].Position);
+                    if(mConstIds[i] == clickedVertex) {
+                        selectedVertexVectorPosition = i;
+                    }
                 }
                 SetConstraintPositions(constPositions);
-                */
+                mHandleOriginPosition = mMesh->mMesh->mVertices[selectedVertex].Position;
+                //mDeltaDrag = glm::vec3(0);
                 isDragging = true;
             }
         }
@@ -174,23 +205,27 @@ public:
         if(!mouse.IsPressed(MOUSE_BUTTON_LEFT) && mMesh->IsSelected() && isDragging) {
             isDragging = false;
             std::cout << " RELEASE " << std::endl;
+            //mConstraintPositions[selectedVertexVectorPosition].x += 1;
         }
 
         if(isDragging) {
 
             glm::vec3 worldSpaceDrag = camera.ScreenToWorldSpace(mDragOrigin - glm::vec3(mouse.GetPosition(), 0));
             std::cout << "drag-x: " << worldSpaceDrag.x << " drag-y: " << worldSpaceDrag.y << std::endl;
+            std::cout << "drag-x: " << mDragOrigin.x - mouse.GetPosition().x << " drag-y: " << worldSpaceDrag.y << std::endl;
 
             // REVERT PREVIOUS CHANGES
             //mDeltaDrag = -mDragVector + worldSpaceDrag;
             //mDragVector = worldSpaceDrag;
 
             glm::mat4 inverse = glm::inverse(mMesh->mMesh->GetGlobalTransform());
-            glm::vec3 newPos = mMesh->mMesh->mVertices[selectedVertex].Position + glm::vec3(inverse * glm::vec4(mDeltaDrag,0));
+            glm::vec3 newPos = mHandleOriginPosition + glm::vec3(inverse * glm::vec4(worldSpaceDrag, 0));//glm::vec4(mDeltaDrag,0));
 
             // UPDATE POSTION
+            mConstraintPositions[selectedVertexVectorPosition] = newPos;
             //SetConstraintPositions();
             // RECALCULATE MESH
+            ComputeModifier();
         }
 
         if(glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) {
@@ -254,9 +289,11 @@ public:
 private:
 
     // SELECTED HANDLE
+    float constraintWeight = 100.0f;
+    unsigned int selectedVertexVectorPosition; // FOR FASTER VECTOR ACCESS
     unsigned int selectedVertex;
     glm::vec3 mDragOrigin;
-    glm::vec3 mDeltaDrag;
+    glm::vec3 mHandleOriginPosition;
 
     bool isDragging = false;
     bool liveCompute = false;
@@ -371,7 +408,10 @@ private:
                     -h2,  h1,   s, t3,
                       0,   0,   0,  1;
 
-            // ... DER OPERATOR MUESSTE NOCH ZWISCHEN GESPEICHERT WERDEN. PROBLEM: Der operator produziert hom Coords..
+            // DIESER OPERATOR LIEGT LINEAR IN DEN RESULTAT VERTICES. D.H. DA DIESER OPERATOR KONSTANT, FUER ALLE
+            // MOEGLICHEN VARIATIONEN BLEIBT, MUSS DIES NICHT IN DER ERROR FUNCTION BERUECKSICHTIG WERDEN
+
+            // DIESER TRANSFORM OPERATOR VERSUCHT ISOTROHPISCHE SKALIERUNG UND KLEINE ROTATIONEN ZU VERBESSERN.
 
         }*/
     }

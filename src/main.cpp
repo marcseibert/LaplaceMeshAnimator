@@ -28,6 +28,12 @@ void mouseCallback(GLFWwindow *window, double xPos, double yPos) {
     }
 }
 
+void mouseScrollCallback(GLFWwindow *window, double xoffset, double yoffset) {
+    if(program) {
+        program->OnMouseScroll(window, xoffset, yoffset);
+    }
+}
+
 // GLOBAL VARIABLES
 GLint windowWidth = 1200;
 GLint windowHeight = 900;
@@ -52,6 +58,7 @@ int main(int argc, const char * argv[]) {
     glfwMakeContextCurrent(window);
     glfwSetWindowSizeCallback(window, setWindowSizeCallback);
     glfwSetCursorPosCallback(window, mouseCallback);
+    glfwSetScrollCallback(window, mouseScrollCallback);
 
     glewExperimental = true;
 

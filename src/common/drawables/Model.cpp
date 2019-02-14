@@ -15,7 +15,7 @@ void Model::Draw(Camera &camera)
 void Model::loadModel(std::string const &path)
 {
     Assimp::Importer importer;
-    const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcessPreset_TargetRealtime_MaxQuality);
+    const aiScene* scene = importer.ReadFile(path, aiProcessPreset_TargetRealtime_MaxQuality | aiProcess_JoinIdenticalVertices);//aiProcess_FlipUVs | aiProcessPreset_TargetRealtime_MaxQuality);
 
     if(!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) // if is Not Zero
     {
@@ -55,7 +55,8 @@ Mesh Model::processMesh(aiMesh *mesh, const aiScene *scene)
     std::vector<Vertex> vertices;
     std::vector<glm::uvec3> faces;
     std::vector<Texture> textures;
-    
+
+    std::cout << "LOADING MODEL WITH " << mesh->mNumVertices << " VERTICES " << std::endl;
     for(unsigned int i = 0; i < mesh->mNumVertices; i++)
     {
         Vertex vertex;

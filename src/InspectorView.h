@@ -24,9 +24,13 @@ public:
 
         // DEFINE UI OBJECTS HERE
         mainCamera = Camera(viewWidth, viewHeight,0,0, -5, true);
-        mSprite = Sprite("../assets/persp.png", 0, 4.0f, 0, 200, 75, Rect(viewX, viewY, viewWidth, viewHeight));
-        mSprite.SetScale(0.8f,0.8f,0.8f);
-        mSprite.UpdateGlobalTransform();
+        orthoSprite = Sprite("../assets/ortho.png", 0, 4.0f, 1, 200, 75, Rect(viewX, viewY, viewWidth, viewHeight));
+        perspSprite = Sprite("../assets/persp.png", 0, 4.0f, 0, 200, 75, Rect(viewX, viewY, viewWidth, viewHeight));
+
+        orthoSprite.SetScale(0.8f,0.8f,0.8f);
+        perspSprite.SetScale(0.8f,0.8f,0.8f);
+        orthoSprite.UpdateGlobalTransform();
+        perspSprite.UpdateGlobalTransform();
         //Box(Rect(0, 0, 200.0f, 200.0f), glm::vec4(1,1,0,1));
 
         //testBox.UpdateGlobalTransform();
@@ -52,7 +56,13 @@ public:
         }
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        renderer.Draw(mainCamera, mSprite);
+        if(perspMode) {
+            renderer.Draw(mainCamera, perspSprite);
+        } else {
+            renderer.Draw(mainCamera, orthoSprite);
+        }
+
+        //renderer.Draw(mainCamera, mSprite);
     };
 
     void UpdateWindowParameters() override {
@@ -60,9 +70,14 @@ public:
         renderer.SetViewport(mBounds);
     };
 
+    void SetPerspectiveMode(bool b) {
+        perspMode = b;
+    };
+
 
 private:
-    Sprite mSprite;
+    bool perspMode = false;
+    Sprite perspSprite, orthoSprite;
     Renderer renderer;
     Camera mainCamera;
 };

@@ -93,6 +93,8 @@ void Sprite::Draw(Camera &camera) {
 
     glBindVertexArray(VAO);
     glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, textureID);
+
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, (void*)0);
 };
 
