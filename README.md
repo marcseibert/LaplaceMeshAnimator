@@ -1,7 +1,9 @@
 # LaplaceMeshAnimator
-A small animator using the laplace mesh editing technique.
+An editor/animator using lacplace mesh editing technique wich originated from a university project.
 
-TODO:
+This project is based on [Laplacian Surface Editing](https://dl.acm.org/doi/pdf/10.1145/1057432.1057456)
+
+## TODO:
 - Fix Scene Graph
 - Clean up code
 - implement Mesh Modifier e.g. Laplace Operator
